@@ -3,13 +3,14 @@
 #include <memory>
 #include <utility>
 
+#include "Vector3D.h"
+
 class Particle
 {
 public:
-    using Position = std::pair<double, double>;
+    using Position = Vector3D;
 
     Particle(double x, double y);
-    ~Particle();
 
     Position position() const;
     void setPosition(Position position);

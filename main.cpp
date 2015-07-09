@@ -19,7 +19,7 @@ public:
         std::mt19937 gen(device());
         std::uniform_real_distribution<double> dist;
 
-        for(int i = 0; i < 100000; ++i) {
+        for(int i = 0; i < 200000; ++i) {
             double x = dist(gen);
             double y = dist(gen);
 
@@ -37,7 +37,7 @@ public:
         glBegin(GL_POINTS);
         for(ParticlePtr particle : m_space) {
             const Particle::Position &position = particle->position();
-            glVertex2d(position.first, position.second);
+            glVertex2d(position.x(), position.y());
         }
         glEnd();
 
@@ -72,7 +72,7 @@ public:
 
 int main()
 {
-    sf::Window window(sf::VideoMode(800, 600), "OpenGL");
+    sf::Window window(sf::VideoMode(1900, 1200), "OpenGL", sf::Style::Fullscreen);
     Application app(window);
 
     return app.run();

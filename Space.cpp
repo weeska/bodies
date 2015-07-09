@@ -1,13 +1,20 @@
 #include "Space.h"
 
+#include "Attraction.h"
+
 Space::Space()
 {
-
+    this->addForce(std::make_shared<Attraction>(0.2, Vector3D()));
 }
 
 Space::~Space()
 {
 
+}
+
+void Space::addForce(ForcePtr force)
+{
+    m_forces.push_back(force);
 }
 
 void Space::addParticle(ParticlePtr particle)
@@ -18,8 +25,13 @@ void Space::addParticle(ParticlePtr particle)
 void Space::tick()
 {
     for(ParticlePtr p : *this) {
-        const Particle::Position &pos = p->position();
-        p->setPosition(Particle::Position(pos.first * 0.99, pos.second * 0.99));
+        Vector3D effect;
+
+        for(ForcePtr force : m_forces) {
+            effect += force->effect(*p);
+        }
+
+        p->setPosition(p->position() + effect);
     }
 }
 

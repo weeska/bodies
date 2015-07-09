@@ -1,12 +1,7 @@
 #include "Particle.h"
 
 Particle::Particle(double x, double y)
-    : m_position(std::pair<double, double>(x, y))
-{
-
-}
-
-Particle::~Particle()
+    : m_position(x, y, 0.0)
 {
 
 }
