@@ -19,7 +19,7 @@ public:
         std::mt19937 gen(device());
         std::uniform_real_distribution<double> dist;
 
-        for(int i = 0; i < 200000; ++i) {
+        for(int i = 0; i < 100000; ++i) {
             double x = dist(gen);
             double y = dist(gen);
 
@@ -33,7 +33,7 @@ public:
     void draw()
     {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+        glPointSize(3.0);
         glBegin(GL_POINTS);
         for(ParticlePtr particle : m_space) {
             const Particle::Position &position = particle->position();

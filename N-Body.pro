@@ -16,18 +16,15 @@ LIBS += -lsfml-window-d
 LIBS += -lopengl32
 
 SOURCES += main.cpp \
+    Math/Vector3D.cpp \
     Space.cpp \
     Particle.cpp \
     Attraction.cpp \
-    Vector3D.cpp
 
 HEADERS += \
+    Math/Vector3D.h \
     Space.h \
     Particle.h \
     Force.h \
     Attraction.h \
-    Vector3D.h
-
-DISTFILES += \
-    qmake.conf
 

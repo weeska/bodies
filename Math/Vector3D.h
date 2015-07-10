@@ -1,5 +1,7 @@
 #pragma once
 
+namespace Math {
+
 class Vector3D
 {
 public:
@@ -33,3 +35,5 @@ private:
     double m_y;
     double m_z;
 };
+
+}

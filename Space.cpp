@@ -4,7 +4,9 @@
 
 Space::Space()
 {
-    this->addForce(std::make_shared<Attraction>(0.2, Vector3D()));
+    this->addForce(std::make_shared<Attraction>(0.1, Math::Vector3D()));
+    this->addForce(std::make_shared<Attraction>(0.01, Math::Vector3D(-0.2, 0.5)));
+    this->addForce(std::make_shared<Attraction>(0.01, Math::Vector3D(-0.8, -0.3)));
 }
 
 Space::~Space()
@@ -25,7 +27,7 @@ void Space::addParticle(ParticlePtr particle)
 void Space::tick()
 {
     for(ParticlePtr p : *this) {
-        Vector3D effect;
+        Math::Vector3D effect;
 
         for(ForcePtr force : m_forces) {
             effect += force->effect(*p);

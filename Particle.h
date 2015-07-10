@@ -8,7 +8,7 @@
 class Particle
 {
 public:
-    using Position = Vector3D;
+    using Position = Math::Vector3D;
 
     Particle(double x, double y);
 
