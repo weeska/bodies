@@ -2,7 +2,7 @@
 
 #include <cmath>
 
-using namespace Math;
+using namespace wmath;
 
 Vector3D::Vector3D(double x, double y, double z)
     : m_x(x)

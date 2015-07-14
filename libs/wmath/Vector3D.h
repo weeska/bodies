@@ -1,6 +1,6 @@
 #pragma once
 
-namespace Math {
+namespace wmath {
 
 class Vector3D
 {

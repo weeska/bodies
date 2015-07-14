@@ -9,7 +9,7 @@ class Particle;
 class Force
 {
 public:
-    virtual Math::Vector3D effect(const Particle &particle) const = 0;
+    virtual wmath::Vector3D effect(const Particle &particle) const = 0;
 };
 
 typedef std::shared_ptr<Force> ForcePtr;

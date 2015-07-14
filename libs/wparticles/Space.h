@@ -13,7 +13,6 @@ public:
     using ParticleIterator = ParticleContainer::iterator;
 
     Space();
-    ~Space();
 
     void addForce(ForcePtr force);
     void addParticle(ParticlePtr particle);
