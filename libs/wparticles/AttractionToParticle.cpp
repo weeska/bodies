@@ -17,7 +17,7 @@ wmath::Vector3Dd AttractionToParticle::effect(const Particle &particle) const
             continue;
         }
 
-        const wmath::Vector3Dd difference = (particle.position() - target->position());
+        const wmath::Vector3Dd &difference = (particle.constPosition() - target->constPosition());
 
         const double invr3 = std::pow(1.0/difference.length(), 3.0);
         const double f = particle.mass() * invr3;
@@ -25,6 +25,6 @@ wmath::Vector3Dd AttractionToParticle::effect(const Particle &particle) const
         result += difference * f;
     }
 
-    return result;
+    return std::move(result);
 }
 

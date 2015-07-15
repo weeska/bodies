@@ -8,7 +8,7 @@ Particle::Particle(double mass, double x, double y, double z)
 
 }
 
-const Particle::Position &Particle::position() const
+const Particle::Position &Particle::constPosition() const
 {
     return m_position;
 }
@@ -26,7 +26,7 @@ void Particle::setMass(double mass)
 {
     m_mass = mass;
 }
-const wmath::Vector3Dd &Particle::velocity() const
+const wmath::Vector3Dd &Particle::constVelocity() const
 {
     return m_velocity;
 }

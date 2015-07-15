@@ -12,14 +12,14 @@ public:
 
     Particle(double mass, double x, double y, double z);
 
-    const Position &position() const;
-    void setPosition(const Position &position);
+    const Position &constPosition() const;
+    void setPosition(const Position &constPosition);
 
     double mass() const;
     void setMass(double mass);
 
-    const wmath::Vector3Dd &velocity() const;
-    void setVelocity(const wmath::Vector3Dd &velocity);
+    const wmath::Vector3Dd &constVelocity() const;
+    void setVelocity(const wmath::Vector3Dd &constVelocity);
 
 private:
     double m_mass;

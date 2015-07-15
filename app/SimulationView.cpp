@@ -8,7 +8,7 @@ SimulationView::SimulationView()
     std::mt19937 gen(device());
     std::uniform_real_distribution<double> dist;
 
-    for(int i = 0; i < 150; ++i) {
+    for(int i = 0; i < 100; ++i) {
         double x = dist(gen);
         double y = dist(gen);
         double z = 0.0;
@@ -48,7 +48,7 @@ void SimulationView::paintGL()
     glClear(GL_COLOR_BUFFER_BIT);
     glBegin(GL_POINTS);
     for(ParticlePtr particle : m_space) {
-        const Particle::Position &position = particle->position();
+        const Particle::Position &position = particle->constPosition();
         glVertex3dv(position.data());
     }
     glEnd();

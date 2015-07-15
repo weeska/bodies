@@ -45,9 +45,10 @@ void Space::tick()
     }
 
     for(std::pair<ParticlePtr, wmath::Vector3Dd> f : accelerations) {
-        const wmath::Vector3Dd &position = f.first->position();
-        const wmath::Vector3Dd &velocity = f.first->velocity();
+        const wmath::Vector3Dd &position = f.first->constPosition();
+        const wmath::Vector3Dd &velocity = f.first->constVelocity();
         const wmath::Vector3Dd &a = f.second;
+
         wmath::Vector3Dd new_position;
         wmath::Vector3Dd new_velocity;
 

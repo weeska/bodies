@@ -1,5 +1,6 @@
 #pragma once
 
+#include <algorithm>
 #include <array>
 #include <cmath>
 
@@ -28,23 +29,23 @@ public:
         Vector3D difference(*this);
         difference += rhs;
 
-        return difference;
+        return std::move(difference);
     }
 
     Vector3D operator-(const Vector3D &rhs) const {
         Vector3D difference(*this);
         difference -= rhs;
 
-        return difference;
+        return std::move(difference);
     }
 
     Vector3D operator*(double scalar) const {
-        Vector3D copy(*this);
-        copy[0] *= scalar;
-        copy[1] *= scalar;
-        copy[2] *= scalar;
+        Vector3D copy;
+        std::transform(std::begin(*this), std::end(*this),
+                       std::begin(copy),
+                       [&](Content v) {return v * scalar;});
 
-        return copy;
+        return std::move(copy);
     }
 
     Vector3D normalized() const {
@@ -61,35 +62,40 @@ public:
         return *this;
     }
 
+    double sqr_length() const
+    {
+        return std::pow(this->x(), 2.0) +
+                std::pow(this->y(), 2.0) +
+                std::pow(this->z(), 2.0);
+    }
+
     double length() const
     {
-        return std::sqrt(this->x() * this->x() + this->y() * this->y() + this->z() * this->z());
+        return std::sqrt(this->sqr_length());
+    }
+
+    template <typename Func>
+    void binaryAssignOp(const Vector3D &other, Func f) {
+        std::transform(std::begin(*this), std::end(*this),
+                       std::begin(other), std::begin(*this),
+                       f);
     }
 
     Vector3D &operator-=(const Vector3D &other)
     {
-        (*this)[0] -= other[0];
-        (*this)[1] -= other[1];
-        (*this)[2] -= other[2];
-
+        this->binaryAssignOp(other, std::minus<Content>());
         return *this;
     }
 
     Vector3D &operator+=(const Vector3D &other)
     {
-        (*this)[0] += other[0];
-        (*this)[1] += other[1];
-        (*this)[2] += other[2];
-
+        this->binaryAssignOp(other, std::plus<Content>());
         return *this;
     }
 
     Vector3D &operator*=(const Vector3D &other)
     {
-        (*this)[0] *= other[0];
-        (*this)[1] *= other[1];
-        (*this)[2] *= other[2];
-
+        this->binaryAssignOp(other, std::multiplies<Content>());
         return *this;
     }
 };
