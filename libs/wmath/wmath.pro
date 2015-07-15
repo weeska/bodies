@@ -3,9 +3,8 @@ CONFIG += static c++11
 CONFIG -= app_bundle qt
 
 HEADERS += \
-    Vector3D.h
+    Vector.h
 
-SOURCES += \
-    Vector3D.cpp
+SOURCES +=
 
 

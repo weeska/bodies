@@ -3,7 +3,7 @@
 Particle::Particle(double mass, double x, double y, double z)
     : m_mass(mass)
     , m_position(x, y, z)
-    , m_velocity(0.0)
+    , m_velocity()
 {
 
 }
@@ -26,12 +26,12 @@ void Particle::setMass(double mass)
 {
     m_mass = mass;
 }
-const wmath::Vector3D &Particle::velocity() const
+const wmath::Vector3Dd &Particle::velocity() const
 {
     return m_velocity;
 }
 
-void Particle::setVelocity(const wmath::Vector3D &velocity)
+void Particle::setVelocity(const wmath::Vector3Dd &velocity)
 {
     m_velocity = velocity;
 }

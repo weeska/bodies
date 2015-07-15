@@ -5,11 +5,11 @@
 class Attraction : public Force
 {
 public:
-    Attraction(double strength, const wmath::Vector3D &position);
+    Attraction(double strength, const wmath::Vector3Dd &position);
 
-    wmath::Vector3D effect(const Particle &particle) const;
+    wmath::Vector3Dd effect(const Particle &particle) const;
 
 private:
     double m_strength;
-    wmath::Vector3D m_target;
+    wmath::Vector3Dd m_target;
 };
