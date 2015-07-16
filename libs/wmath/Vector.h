@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <array>
 #include <cmath>
+#include <iostream>
 
 namespace wmath {
 
@@ -16,10 +17,6 @@ public:
         this->setY(y);
         this->setZ(z);
     }
-
-    double x() const { return std::get<0>(*this); }
-    double y() const { return std::get<1>(*this); }
-    double z() const { return std::get<2>(*this); }
 
     void setX(double x) { (*this)[0] = x; }
     void setY(double y) { (*this)[1] = y; }
@@ -64,9 +61,9 @@ public:
 
     double sqr_length() const
     {
-        return std::pow(this->x(), 2.0) +
-                std::pow(this->y(), 2.0) +
-                std::pow(this->z(), 2.0);
+        return std::pow((*this)[0], 2.0) +
+                std::pow((*this)[1], 2.0) +
+                std::pow((*this)[2], 2.0);
     }
 
     double length() const

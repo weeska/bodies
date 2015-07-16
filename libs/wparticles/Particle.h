@@ -8,22 +8,25 @@
 class Particle
 {
 public:
-    using Position = wmath::Vector3Dd;
-
     Particle(double mass, double x, double y, double z);
 
-    const Position &constPosition() const;
-    void setPosition(const Position &constPosition);
+    const wmath::Vector3Dd &constPosition() const;
+    const wmath::Vector3Dd &constVelocity() const;
 
     double mass() const;
-    void setMass(double mass);
+    wmath::Vector3Dd &acceleration();
+    wmath::Vector3Dd &position();
+    wmath::Vector3Dd &velocity();
 
-    const wmath::Vector3Dd &constVelocity() const;
+    void setMass(double mass);
+    void setAcceleration(const wmath::Vector3Dd &acceleration);
+    void setPosition(const wmath::Vector3Dd &position);
     void setVelocity(const wmath::Vector3Dd &constVelocity);
 
 private:
     double m_mass;
-    Position m_position;
+    wmath::Vector3Dd m_acceleration;
+    wmath::Vector3Dd m_position;
     wmath::Vector3Dd m_velocity;
 };
 

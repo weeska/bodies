@@ -1,68 +1,65 @@
 #include "Space.h"
-
-#include "Attraction.h"
-#include "AttractionToParticle.h"
-
-#include <map>
+#include <cassert>
 
 Space::Space()
 {
-    this->addForce(std::make_shared<Attraction>(0.2, wmath::Vector3Dd()));
-}
-
-void Space::addForce(ForcePtr force)
-{
-    m_forces.push_back(force);
 }
 
 void Space::addParticle(ParticlePtr particle)
 {
     m_particles.push_back(particle);
-    this->addForce(std::make_shared<AttractionToParticle>(*this));
 }
 
-double newPosition(double current, double velocity, double step, double acceleration) {
-    return current + step * velocity + 0.5 * step * step * acceleration;
+void Space::accumulateEffects()
+{
+    for(ParticlePtr p_i : m_particles) {
+        wmath::Vector3Dd &acceleration = p_i->acceleration();
+        p_i->velocity().fill(0.0);
+        acceleration.fill(0.0);
+
+        for(ParticlePtr p_j: m_particles) {
+            const wmath::Vector3Dd &constPosition = p_i->constPosition();
+            const wmath::Vector3Dd &constTargetPosition = p_j->constPosition();
+            wmath::Vector3Dd difference;
+
+            difference[0] = constTargetPosition[0] - constPosition[0];
+            difference[1] = constTargetPosition[1] - constPosition[1];
+            difference[2] = constTargetPosition[2] - constPosition[2];
+
+            if(difference.sqr_length() < 25.0) {
+                continue;
+            }
+
+            const double invr = 1.0/std::sqrt(difference.sqr_length() + 0.0001);
+            const double invr3 = invr * invr * invr;
+            const double f = p_j->mass() * invr3;
+
+            acceleration[0] += f * difference[0];
+            acceleration[1] += f * difference[1];
+            acceleration[2] += f * difference[2];
+        }
+    }
 }
 
-double newVelocity(double current, double step, double acceleration) {
-    return current + step * acceleration;
+void Space::applyEffects()
+{
+    static const double dt = 1.0;
+    for(ParticlePtr particle : m_particles) {
+        wmath::Vector3Dd &position = particle->position();
+        wmath::Vector3Dd &velocity = particle->velocity();
+        wmath::Vector3Dd &acceleration = particle->acceleration();
+
+        for(int i=0; i < 3; ++i) {
+            position[i] += dt * velocity[i] + 0.5 * dt * dt * acceleration[i];
+            velocity[i] += dt * acceleration[i];
+        }
+    }
 }
 
 void Space::tick()
 {
-    static const double dt = 1.0;
-    std::map<ParticlePtr, wmath::Vector3Dd> accelerations;
-
-    for(ParticlePtr p : *this) {
-        wmath::Vector3Dd effect;
-
-        for(ForcePtr force : m_forces) {
-            effect += force->effect(*p);
-        }
-
-        accelerations[p] = effect;
-    }
-
-    for(std::pair<ParticlePtr, wmath::Vector3Dd> f : accelerations) {
-        const wmath::Vector3Dd &position = f.first->constPosition();
-        const wmath::Vector3Dd &velocity = f.first->constVelocity();
-        const wmath::Vector3Dd &a = f.second;
-
-        wmath::Vector3Dd new_position;
-        wmath::Vector3Dd new_velocity;
-
-        new_position.setX( newPosition( position.x(), velocity.x(), dt, a.x()) );
-        new_position.setY( newPosition( position.y(), velocity.y(), dt, a.y()) );
-        new_position.setZ( newPosition( position.z(), velocity.z(), dt, a.z()) );
-
-        new_velocity.setX( newVelocity( velocity.x(), dt, a.x() ));
-        new_velocity.setY( newVelocity( velocity.y(), dt, a.y() ));
-        new_velocity.setZ( newVelocity( velocity.z(), dt, a.z() ));
-
-        f.first->setPosition(new_position);
-        f.first->setVelocity(new_velocity);
-    }
+    this->accumulateEffects();
+    this->applyEffects();
 }
 
 Space::ParticleIterator Space::begin()

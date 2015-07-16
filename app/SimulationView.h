@@ -13,6 +13,7 @@ class SimulationView : public QOpenGLWidget
 public:
     SimulationView();
 
+    void drawMotionVectors();
 public slots:
     void tick();
 
