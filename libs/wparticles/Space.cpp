@@ -1,6 +1,8 @@
 #include "Space.h"
 #include <cassert>
 
+static const double dt = 0.0001;
+
 Space::Space()
 {
 }
@@ -14,7 +16,7 @@ void Space::accumulateEffects()
 {
     for(ParticlePtr p_i : m_particles) {
         wmath::Vector3Dd &acceleration = p_i->acceleration();
-        p_i->velocity().fill(0.0);
+        p_i->velocity() *= 0.9;
         acceleration.fill(0.0);
 
         for(ParticlePtr p_j: m_particles) {
@@ -43,7 +45,6 @@ void Space::accumulateEffects()
 
 void Space::applyEffects()
 {
-    static const double dt = 1.0;
     for(ParticlePtr particle : m_particles) {
         wmath::Vector3Dd &position = particle->position();
         wmath::Vector3Dd &velocity = particle->velocity();

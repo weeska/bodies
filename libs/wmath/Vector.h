@@ -90,9 +90,24 @@ public:
         return *this;
     }
 
+    Vector3D &operator*=(double scalar)
+    {
+        std::transform(std::begin(*this), std::end(*this),
+                       std::begin(*this),
+                       [&](Content v) {return v * scalar;});
+
+        return *this;
+    }
+
     Vector3D &operator*=(const Vector3D &other)
     {
         this->binaryAssignOp(other, std::multiplies<Content>());
+        return *this;
+    }
+
+    Vector3D &operator/=(const Vector3D &other)
+    {
+        this->binaryAssignOp(other, std::divides<Content>());
         return *this;
     }
 };

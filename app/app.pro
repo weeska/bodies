@@ -12,7 +12,7 @@ SOURCES += main.cpp \
 
 HEADERS  += \
     SimulationView.h
-FORMS    += MainWindow.ui
+FORMS    +=
 
 INCLUDEPATH += $$PWD/../libs
 
