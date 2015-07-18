@@ -5,10 +5,20 @@
 #include <random>
 
 static const double PI = 4 * std::atan(1);
-SimulationView::SimulationView()
+
+
+bool SimulationView::showVelocities() const
 {
+    return m_showVelocities;
+}
+
+void SimulationView::reset()
+{
+    m_space.clear();
+
     std::random_device device;
     std::mt19937 gen(device());
+    gen.seed(1);
     std::uniform_real_distribution<double> dist;
 
     const int N = 2000;
@@ -23,25 +33,36 @@ SimulationView::SimulationView()
         ParticlePtr p = std::make_shared<Particle>(10e8, x, y, z);
         m_space.addParticle(p);
     }
+}
+SimulationView::SimulationView(QWidget *parent)
+    : QOpenGLWidget(parent)
+    , m_showVelocities(false)
+{
+    this->reset();
 
     QObject::connect(&m_timer, SIGNAL(timeout()), SLOT(tick()));
-
     this->tick();
 }
 
 void SimulationView::tick()
 {
-    m_space.accumulateEffects();
-    m_space.applyEffects();
+    m_space.tick();
     this->update();
     m_timer.start(1);
+}
+
+void SimulationView::setShowVelocities(bool show)
+{
+    if(m_showVelocities != show) {
+        m_showVelocities = show;
+        this->update();
+    }
 }
 
 void SimulationView::initializeGL()
 {
     static const double scale = 1000.0;
     glOrtho(-scale, scale, -scale, scale, -1.0, 1.0);
-    glPointSize(2.0);
 }
 
 void SimulationView::resizeGL(int w, int h)
@@ -72,7 +93,6 @@ void SimulationView::drawMotionVectors()
 void SimulationView::paintGL()
 {
     glClear(GL_COLOR_BUFFER_BIT);
-    glPointSize(1.0);
     glBegin(GL_POINTS);
     glColor3d(0.0, 1.0, 0.0);
     for(ParticlePtr particle : m_space) {
@@ -81,6 +101,8 @@ void SimulationView::paintGL()
     }
     glEnd();
 
-    //this->drawMotionVectors();
+    if(m_showVelocities) {
+        this->drawMotionVectors();
+    }
 }
 

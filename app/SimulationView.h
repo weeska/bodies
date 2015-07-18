@@ -10,12 +10,17 @@ class SimulationView : public QOpenGLWidget
 
     Space m_space;
     QTimer m_timer;
+    bool m_showVelocities;
 public:
-    SimulationView();
+    SimulationView(QWidget *parent);
 
     void drawMotionVectors();
+    bool showVelocities() const;
+
 public slots:
+    void reset();
     void tick();
+    void setShowVelocities(bool show);
 
 protected:
     void initializeGL();

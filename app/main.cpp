@@ -1,14 +1,13 @@
 #include <QMainWindow>
 #include <QApplication>
 
+#include "MainWindow.h"
 #include "SimulationView.h"
 
 int main(int argc, char **argv)
 {
     QApplication app(argc, argv);
-    QMainWindow window;
-
-    window.setCentralWidget(new SimulationView);
+    MainWindow window;
     window.showMaximized();
 
     return app.exec();

@@ -14,13 +14,13 @@ public:
     Space();
 
     void addParticle(ParticlePtr particle);
+    void clear();
 
     void tick();
 
-
     ParticleIterator begin();
     ParticleIterator end();
-    void accumulateEffects();
+private:
     void applyEffects();
 private:
     ParticleContainer m_particles;

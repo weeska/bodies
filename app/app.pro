@@ -8,11 +8,14 @@ TEMPLATE = app
 CONFIG += c++11
 
 SOURCES += main.cpp \
-    SimulationView.cpp
+    SimulationView.cpp \
+    MainWindow.cpp
 
 HEADERS  += \
-    SimulationView.h
-FORMS    +=
+    SimulationView.h \
+    MainWindow.h
+FORMS    += \
+    MainWindow.ui
 
 INCLUDEPATH += $$PWD/../libs
 

@@ -19,19 +19,24 @@ private Q_SLOTS:
 
 SimulationBench::SimulationBench()
 {
+    m_space.clear();
+
     std::random_device device;
     std::mt19937 gen(device());
+    gen.seed(1);
     std::uniform_real_distribution<double> dist;
 
-    for(int i = 0; i < 250; ++i) {
+    const int N = 10000;
+    for(int i = 0; i < N; ++i) {
         double x = dist(gen);
         double y = dist(gen);
         double z = 0.0;
 
-        x = x * 2.0 - 1.0;
-        y = y * 2.0 - 1.0;
+        x = x * N * 1.0 - N * 0.5;
+        y = y * N * 1.0 - N * 0.5;
 
-        m_space.addParticle(std::make_shared<Particle>(0.1, x, y, z));
+        ParticlePtr p = std::make_shared<Particle>(10e8, x, y, z);
+        m_space.addParticle(p);
     }
 }
 
