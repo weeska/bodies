@@ -3,6 +3,7 @@
 #include <QOpenGLWidget>
 #include <QTimer>
 #include "wparticles/Space.h"
+#include "wparticles/UniformParticleGenerator.h"
 
 class SimulationView : public QOpenGLWidget
 {
@@ -11,6 +12,7 @@ class SimulationView : public QOpenGLWidget
     Space m_space;
     QTimer m_timer;
     bool m_showVelocities;
+    std::shared_ptr<ParticleGenerator> m_particleGenerator;
 public:
     SimulationView(QWidget *parent);
 

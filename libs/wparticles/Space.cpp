@@ -4,21 +4,7 @@
 #include <future>
 static const double dt = 0.0001;
 
-Space::Space()
-{
-}
-
-void Space::addParticle(ParticlePtr particle)
-{
-    m_particles.push_back(particle);
-}
-
-void Space::clear()
-{
-    m_particles.clear();
-}
-
-void accumulateEffects(Space::ParticleContainer &particles, int from, int to)
+void accumulateEffects(std::vector<ParticlePtr> &particles, int from, int to)
 {
     for(int i=from; i < to; ++i) {
         ParticlePtr p_i = particles[i];
@@ -39,7 +25,7 @@ void accumulateEffects(Space::ParticleContainer &particles, int from, int to)
                 continue;
             }
 
-            const double invr = 1.0/std::sqrt(difference.sqr_length() + 0.0001);
+            const double invr = 1.0/difference.length();
             const double invr3 = invr * invr * invr;
             const double f = p_j->mass() * invr3;
 
@@ -66,7 +52,7 @@ void Space::applyEffects()
 
 void Space::tick()
 {
-    static const int num_threads = 4;
+    static const int num_threads = std::thread::hardware_concurrency();
 
     std::vector<std::thread> threads;
 
@@ -82,13 +68,13 @@ void Space::tick()
     this->applyEffects();
 }
 
-Space::ParticleIterator Space::begin()
+std::vector<ParticlePtr> &Space::particles()
 {
-    return m_particles.begin();
+    return m_particles;
 }
 
-Space::ParticleIterator Space::end()
+const std::vector<ParticlePtr> &Space::constParticles() const
 {
-    return m_particles.end();
+    return m_particles;
 }
 

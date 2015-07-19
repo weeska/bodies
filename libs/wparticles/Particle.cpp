@@ -53,3 +53,13 @@ void Particle::setVelocity(const wmath::Vector3Dd &velocity)
 {
     m_velocity = velocity;
 }
+const wmath::Vector3Dd &Particle::constColor() const
+{
+    return m_color;
+}
+
+void Particle::setColor(const wmath::Vector3Dd &color)
+{
+    m_color = color;
+}
+

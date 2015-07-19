@@ -14,29 +14,15 @@ bool SimulationView::showVelocities() const
 
 void SimulationView::reset()
 {
-    m_space.clear();
-
-    std::random_device device;
-    std::mt19937 gen(device());
-    gen.seed(1);
-    std::uniform_real_distribution<double> dist;
-
-    const int N = 2000;
-    for(int i = 0; i < N; ++i) {
-        double x = dist(gen);
-        double y = dist(gen);
-        double z = 0.0;
-
-        x = x * N * 1.0 - N * 0.5;
-        y = y * N * 1.0 - N * 0.5;
-
-        ParticlePtr p = std::make_shared<Particle>(10e8, x, y, z);
-        m_space.addParticle(p);
+    if(m_particleGenerator) {
+        m_particleGenerator->generate(m_space.particles());
     }
 }
+
 SimulationView::SimulationView(QWidget *parent)
     : QOpenGLWidget(parent)
     , m_showVelocities(false)
+    , m_particleGenerator(std::make_shared<UniformParticleGenerator>(4000))
 {
     this->reset();
 
@@ -63,6 +49,9 @@ void SimulationView::initializeGL()
 {
     static const double scale = 1000.0;
     glOrtho(-scale, scale, -scale, scale, -1.0, 1.0);
+
+    glEnable(GL_BLEND);
+    glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
 void SimulationView::resizeGL(int w, int h)
@@ -73,18 +62,18 @@ void SimulationView::resizeGL(int w, int h)
 void SimulationView::drawMotionVectors()
 {
     glBegin(GL_LINES);
-    for(ParticlePtr particle : m_space) {
+    for(ParticlePtr particle : m_space.constParticles()) {
         static const double dt = 0.0001;
-        const wmath::Vector3Dd &position = particle->position();
         const wmath::Vector3Dd &acceleration = particle->acceleration();
+        const wmath::Vector3Dd &position = particle->position();
         const wmath::Vector3Dd &velocity = particle->constVelocity();
 
         auto p = [&](int i) { return position[i] + dt * velocity[i] + 0.5 * dt * dt * acceleration[i];};
         auto v = [&](int i) { return velocity[i] + dt * acceleration[i];};
 
-        glColor3d(1.0, 1.0, 0.0);
+        glColor4d(1.0, 1.0, 0.0, 0.2);
         glVertex3d(p(0), p(1), p(2));
-        glColor3d(1.0, 0.0, 0.0);
+        glColor4d(1.0, 0.0, 0.0, 0.2);
         glVertex3d(p(0) + v(0) * 0.001, p(1) + v(1) * 0.001, p(2) + v(2) * 0.001);
     }
     glEnd();
@@ -93,16 +82,18 @@ void SimulationView::drawMotionVectors()
 void SimulationView::paintGL()
 {
     glClear(GL_COLOR_BUFFER_BIT);
-    glBegin(GL_POINTS);
-    glColor3d(0.0, 1.0, 0.0);
-    for(ParticlePtr particle : m_space) {
-        const wmath::Vector3Dd &position = particle->constPosition();
-        glVertex3dv(position.data());
-    }
-    glEnd();
 
     if(m_showVelocities) {
         this->drawMotionVectors();
     }
+
+    glBegin(GL_POINTS);
+    for(ParticlePtr particle : m_space.constParticles()) {
+        const wmath::Vector3Dd &color = particle->constColor();
+        const wmath::Vector3Dd &position = particle->constPosition();
+        glColor4d(color[0], color[1], color[2], 0.6);
+        glVertex3dv(position.data());
+    }
+    glEnd();
 }
 

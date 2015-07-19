@@ -10,6 +10,7 @@ class Particle
 public:
     Particle(double mass, double x, double y, double z);
 
+    const wmath::Vector3Dd &constColor() const;
     const wmath::Vector3Dd &constPosition() const;
     const wmath::Vector3Dd &constVelocity() const;
 
@@ -20,12 +21,15 @@ public:
 
     void setMass(double mass);
     void setAcceleration(const wmath::Vector3Dd &acceleration);
+    void setColor(const wmath::Vector3Dd &constColor);
     void setPosition(const wmath::Vector3Dd &position);
     void setVelocity(const wmath::Vector3Dd &constVelocity);
+
 
 private:
     double m_mass;
     wmath::Vector3Dd m_acceleration;
+    wmath::Vector3Dd m_color;
     wmath::Vector3Dd m_position;
     wmath::Vector3Dd m_velocity;
 };

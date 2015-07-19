@@ -8,20 +8,12 @@
 class Space
 {
 public:
-    using ParticleContainer = std::vector<ParticlePtr>;
-    using ParticleIterator = ParticleContainer::iterator;
-
-    Space();
-
-    void addParticle(ParticlePtr particle);
-    void clear();
-
     void tick();
+    std::vector<ParticlePtr> &particles();
+    const std::vector<ParticlePtr> &constParticles() const;
 
-    ParticleIterator begin();
-    ParticleIterator end();
 private:
     void applyEffects();
 private:
-    ParticleContainer m_particles;
+    std::vector<ParticlePtr> m_particles;
 };

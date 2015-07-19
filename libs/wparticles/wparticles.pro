@@ -4,11 +4,14 @@ CONFIG -= app_bundle qt
 
 SOURCES += \
     Particle.cpp \
-    Space.cpp
+    Space.cpp \
+    UniformParticleGenerator.cpp
 
 HEADERS += \
     Particle.h \
-    Space.h
+    Space.h \
+    ParticleGenerator.h \
+    UniformParticleGenerator.h
 
 
 INCLUDEPATH += ../
