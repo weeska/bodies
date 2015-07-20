@@ -32,10 +32,10 @@ void UniformParticleGenerator::generate(std::vector<ParticlePtr> &particles) con
 
         ParticlePtr p = std::make_shared<Particle>(10e8, x, y, z);
         if(x < 0.0) {
-            p->setColor(wmath::Vector3Dd(0.0, 1.0, 0.5));
+            p->setColor(wmath::Vec3d(0.0, 1.0, 0.5));
         }
         else {
-            p->setColor(wmath::Vector3Dd(0.0, 0.5, 1.0));
+            p->setColor(wmath::Vec3d(0.0, 0.5, 1.0));
         }
         particles.push_back(p);
     }

@@ -64,9 +64,9 @@ void SimulationView::drawMotionVectors()
     glBegin(GL_LINES);
     for(ParticlePtr particle : m_space.constParticles()) {
         static const double dt = 0.0001;
-        const wmath::Vector3Dd &acceleration = particle->acceleration();
-        const wmath::Vector3Dd &position = particle->position();
-        const wmath::Vector3Dd &velocity = particle->constVelocity();
+        const wmath::Vec3d &acceleration = particle->acceleration();
+        const wmath::Vec3d &position = particle->position();
+        const wmath::Vec3d &velocity = particle->constVelocity();
 
         auto p = [&](int i) { return position[i] + dt * velocity[i] + 0.5 * dt * dt * acceleration[i];};
         auto v = [&](int i) { return velocity[i] + dt * acceleration[i];};
@@ -89,8 +89,8 @@ void SimulationView::paintGL()
 
     glBegin(GL_POINTS);
     for(ParticlePtr particle : m_space.constParticles()) {
-        const wmath::Vector3Dd &color = particle->constColor();
-        const wmath::Vector3Dd &position = particle->constPosition();
+        const wmath::Vec3d &color = particle->constColor();
+        const wmath::Vec3d &position = particle->constPosition();
         glColor4d(color[0], color[1], color[2], 0.6);
         glVertex3dv(position.data());
     }

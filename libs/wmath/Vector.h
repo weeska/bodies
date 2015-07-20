@@ -7,111 +7,140 @@
 
 namespace wmath {
 
-template <class Content = double>
-class Vector3D : public std::array<Content, 3>
-{
+namespace operators {
+template <typename Type>
+Type addOp(const Type &lhs, const Type &rhs) {
+    Type sum(lhs);
+    sum += rhs;
+    return std::move(sum);
+}
 
+template <typename Type>
+Type subtractOp(const Type &lhs, const Type &rhs) {
+    Type sum(lhs);
+    return std::move(sum -= rhs);
+}
+
+template <typename Type, typename Func>
+void binaryAssignOp(Type &lhs, const Type &rhs, Func f) {
+    std::transform(std::begin(lhs), std::end(lhs),
+                   std::begin(rhs), std::begin(lhs),
+                   f);
+}
+
+}
+
+template <class Content, int Size>
+class Vector : public std::array<Content,Size>{
 public:
-    Vector3D(double x = 0.0, double y = 0.0, double z = 0.0) {
-        this->setX(x);
-        this->setY(y);
-        this->setZ(z);
+    Vector()
+        : std::array<Content, Size>()
+    {
     }
 
-    void setX(double x) { (*this)[0] = x; }
-    void setY(double y) { (*this)[1] = y; }
-    void setZ(double z)  { (*this)[2] = z; }
-
-    Vector3D operator+(const Vector3D &rhs) const {
-        Vector3D difference(*this);
-        difference += rhs;
-
-        return std::move(difference);
+    Vector operator+(const Vector &rhs) {
+        return std::move(operators::addOp(*this, rhs));
     }
 
-    Vector3D operator-(const Vector3D &rhs) const {
-        Vector3D difference(*this);
-        difference -= rhs;
-
-        return std::move(difference);
+    Vector operator-(const Vector &rhs) {
+        return std::move(operators::subtractOp(*this, rhs));
     }
 
-    Vector3D operator*(double scalar) const {
-        Vector3D copy;
-        std::transform(std::begin(*this), std::end(*this),
-                       std::begin(copy),
-                       [&](Content v) {return v * scalar;});
-
-        return std::move(copy);
+    Vector &operator+=(const Vector &other) {
+        operators::binaryAssignOp(*this, other, std::plus<Content>());
+        return *this;
     }
 
-    Vector3D normalized() const {
-        return Vector3D(*this).normalize();
+    Vector &operator-=(const Vector &other) {
+        operators::binaryAssignOp(*this, other, std::minus<Content>());
+        return *this;
     }
 
-    Vector3D &normalize() {
+    Vector &operator*=(Content factor) {
+        std::transform(std::begin(*this), std::end(*this), std::begin(*this), [&](Content v){return v * factor;});
+        return (*this);
+    }
+
+    template <typename ResultType = double>
+    ResultType sqr_length() const {
+        auto sqr = [](Content acc, Content v) {return acc + v * v;};
+        return std::accumulate(std::begin(*this), std::end(*this), ResultType(), sqr);
+    }
+
+    template <typename ResultType = double>
+    ResultType length() const {
+        return std::sqrt(this->sqr_length<ResultType>());
+    }
+
+    Vector &normalize() {
         const double length_ = this->length();
-
-        (*this)[0] /= length_;
-        (*this)[1] /= length_;
-        (*this)[2] /= length_;
-
-        return *this;
-    }
-
-    double sqr_length() const
-    {
-        return std::pow((*this)[0], 2.0) +
-                std::pow((*this)[1], 2.0) +
-                std::pow((*this)[2], 2.0);
-    }
-
-    double length() const
-    {
-        return std::sqrt(this->sqr_length());
-    }
-
-    template <typename Func>
-    void binaryAssignOp(const Vector3D &other, Func f) {
-        std::transform(std::begin(*this), std::end(*this),
-                       std::begin(other), std::begin(*this),
-                       f);
-    }
-
-    Vector3D &operator-=(const Vector3D &other)
-    {
-        this->binaryAssignOp(other, std::minus<Content>());
-        return *this;
-    }
-
-    Vector3D &operator+=(const Vector3D &other)
-    {
-        this->binaryAssignOp(other, std::plus<Content>());
-        return *this;
-    }
-
-    Vector3D &operator*=(double scalar)
-    {
-        std::transform(std::begin(*this), std::end(*this),
-                       std::begin(*this),
-                       [&](Content v) {return v * scalar;});
-
-        return *this;
-    }
-
-    Vector3D &operator*=(const Vector3D &other)
-    {
-        this->binaryAssignOp(other, std::multiplies<Content>());
-        return *this;
-    }
-
-    Vector3D &operator/=(const Vector3D &other)
-    {
-        this->binaryAssignOp(other, std::divides<Content>());
+        std::transform(std::begin(*this), std::end(*this), std::begin(*this), [&](Content v){return v / length_;});
         return *this;
     }
 };
 
-typedef Vector3D<double> Vector3Dd;
+template <typename Content>
+class Vec2 : public Vector<Content, 2>
+{
+public:
+    Vec2(Content x = Content(), Content y = Content())
+    {
+        (*this)[0] = x;
+        (*this)[1] = y;
+    }
+
+    Vec2 operator+(const Vec2 &rhs) {
+        return std::move(operators::addOp(*this, rhs));
+    }
+
+    Vec2 operator-(const Vec2 &rhs) {
+        return std::move(operators::subtractOp(*this, rhs));
+    }
+};
+
+template <typename Content>
+class Vec3 : public Vector<Content, 3>
+{
+public:
+    Vec3(Content x = Content(), Content y = Content(), Content z = Content())
+    {
+        (*this)[0] = x;
+        (*this)[1] = y;
+        (*this)[2] = z;
+    }
+
+    Vec3 operator+(const Vec3 &rhs) {
+        return std::move(operators::addOp(*this, rhs));
+    }
+
+    Vec3 operator-(const Vec3 &rhs) {
+        return std::move(operators::subtractOp(*this, rhs));
+    }
+};
+
+template <typename Content>
+class Vec4 : public Vector<Content, 4>
+{
+public:
+    Vec4(Content x = Content(), Content y = Content(), Content z = Content(), Content w = Content())
+    {
+        (*this)[0] = x;
+        (*this)[1] = y;
+        (*this)[2] = z;
+        (*this)[3] = w;
+    }
+
+    Vec4 operator+(const Vec4 &rhs) {
+        return std::move(operators::addOp(*this, rhs));
+    }
+
+    Vec4 operator-(const Vec4 &rhs) {
+        return std::move(operators::subtractOp(*this, rhs));
+    }
+};
+
+typedef Vec2<double> Vec2d;
+typedef Vec3<double> Vec3d;
+typedef Vec4<double> Vec4d;
 
 }

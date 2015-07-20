@@ -8,14 +8,14 @@ void accumulateEffects(std::vector<ParticlePtr> &particles, int from, int to)
 {
     for(int i=from; i < to; ++i) {
         ParticlePtr p_i = particles[i];
-        wmath::Vector3Dd &acceleration = p_i->acceleration();
+        wmath::Vec3d &acceleration = p_i->acceleration();
         p_i->velocity() *= 0.9;
         acceleration.fill(0.0);
 
         for(ParticlePtr p_j: particles) {
-            const wmath::Vector3Dd &constPosition = p_i->constPosition();
-            const wmath::Vector3Dd &constTargetPosition = p_j->constPosition();
-            wmath::Vector3Dd difference;
+            const wmath::Vec3d &constPosition = p_i->constPosition();
+            const wmath::Vec3d &constTargetPosition = p_j->constPosition();
+            wmath::Vec3d difference;
 
             difference[0] = constTargetPosition[0] - constPosition[0];
             difference[1] = constTargetPosition[1] - constPosition[1];
@@ -39,9 +39,9 @@ void accumulateEffects(std::vector<ParticlePtr> &particles, int from, int to)
 void Space::applyEffects()
 {
     for(ParticlePtr particle : m_particles) {
-        wmath::Vector3Dd &position = particle->position();
-        wmath::Vector3Dd &velocity = particle->velocity();
-        wmath::Vector3Dd &acceleration = particle->acceleration();
+        wmath::Vec3d &position = particle->position();
+        wmath::Vec3d &velocity = particle->velocity();
+        wmath::Vec3d &acceleration = particle->acceleration();
 
         for(int i=0; i < 3; ++i) {
             position[i] += dt * velocity[i] + 0.5 * dt * dt * acceleration[i];
