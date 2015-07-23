@@ -3,7 +3,7 @@
 #include <map>
 #include <vector>
 
-#include "Particle.h"
+#include "wmath/Vector.h"
 
 class Space
 {
@@ -22,8 +22,6 @@ public:
     const std::vector<wmath::Vec3d> &colors() const;
     const std::vector<wmath::Vec3d> &positions() const;
     const std::vector<wmath::Vec3d> &velocities() const;
-
-    const std::vector<ParticlePtr> &constParticles() const;
 
     void addParticleData(const wmath::Vec3d &position, const wmath::Vec3d &color, double mass);
     void resetData();
