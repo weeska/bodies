@@ -15,7 +15,7 @@ bool SimulationView::showVelocities() const
 void SimulationView::reset()
 {
     if(m_particleGenerator) {
-        m_particleGenerator->generate(m_space);
+        m_particleGenerator->generate(m_space.particles());
     }
 }
 
@@ -61,20 +61,15 @@ void SimulationView::resizeGL(int w, int h)
 
 void SimulationView::drawMotionVectors()
 {
-    static const double dt = 0.0001;
-
-    const std::vector<wmath::Vec3d> &accelerations = m_space.accelerations();
-    const std::vector<wmath::Vec3d> &positions = m_space.positions();
-    const std::vector<wmath::Vec3d> &velocities = m_space.velocities();
-
     glBegin(GL_LINES);
-    for(size_t i = 0; i < m_space.particleCount(); ++i) {
-        const wmath::Vec3d &acceleration = accelerations[i];
-        const wmath::Vec3d &position = positions[i];
-        const wmath::Vec3d &velocity = velocities[i];
+    for(ParticlePtr particle : m_space.constParticles()) {
+        static const double dt = 0.0001;
+        const wmath::Vec3d &acceleration = particle->acceleration();
+        const wmath::Vec3d &position = particle->position();
+        const wmath::Vec3d &velocity = particle->constVelocity();
 
-        auto p = [&](int j) { return position[j] + dt * velocity[j] + 0.5 * dt * dt * acceleration[j];};
-        auto v = [&](int j) { return velocity[j] + dt * acceleration[j];};
+        auto p = [&](int i) { return position[i] + dt * velocity[i] + 0.5 * dt * dt * acceleration[i];};
+        auto v = [&](int i) { return velocity[i] + dt * acceleration[i];};
 
         glColor4d(1.0, 1.0, 0.0, 0.2);
         glVertex3d(p(0), p(1), p(2));
@@ -92,13 +87,10 @@ void SimulationView::paintGL()
         this->drawMotionVectors();
     }
 
-    const std::vector<wmath::Vec3d> &positions = m_space.positions();
-    const std::vector<wmath::Vec3d> &colors = m_space.colors();
-
     glBegin(GL_POINTS);
-    for(size_t i = 0; i < m_space.particleCount(); ++i) {
-        const wmath::Vec3d &color = colors[i];
-        const wmath::Vec3d &position = positions[i];
+    for(ParticlePtr particle : m_space.constParticles()) {
+        const wmath::Vec3d &color = particle->constColor();
+        const wmath::Vec3d &position = particle->constPosition();
         glColor4d(color[0], color[1], color[2], 0.6);
         glVertex3dv(position.data());
     }

@@ -2,9 +2,6 @@
 
 #include <QOpenGLWidget>
 #include <QTimer>
-
-#include <memory>
-
 #include "wparticles/Space.h"
 #include "wparticles/UniformParticleGenerator.h"
 

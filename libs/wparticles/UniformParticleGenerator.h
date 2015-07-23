@@ -12,5 +12,5 @@ public:
     void setSeed(uint_fast32_t seed);
     void setParticleCount(size_t particleCount);
 
-    virtual void generate(Space &space) const;
+    virtual void generate(std::vector<ParticlePtr> &particles) const;
 };

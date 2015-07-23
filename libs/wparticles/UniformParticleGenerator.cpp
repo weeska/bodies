@@ -9,15 +9,13 @@ void UniformParticleGenerator::setParticleCount(size_t particleCount)
 {
     m_particleCount = particleCount;
 }
-
 UniformParticleGenerator::UniformParticleGenerator(size_t count, uint_fast32_t seed)
     : m_particleCount(count)
     , m_seed(seed) {}
 
-void UniformParticleGenerator::generate(Space &space) const
+void UniformParticleGenerator::generate(std::vector<ParticlePtr> &particles) const
 {
-    space.resetData();
-    space.reserve(m_particleCount);
+    particles.clear();
 
     std::random_device device;
     std::mt19937 gen(device());
@@ -32,8 +30,13 @@ void UniformParticleGenerator::generate(Space &space) const
         x = x * 2000.0 - 1000.0;
         y = y * 2000.0 - 1000.0;
 
-        space.addParticleData(wmath::Vec3d(x, y, z),
-                              x > 0 ? wmath::Vec3d(0.0, 0.5, 1.0) : wmath::Vec3d(0.0, 1.0, 0.5),
-                              10e8);
+        ParticlePtr p = std::make_shared<Particle>(10e8, x, y, z);
+        if(x < 0.0) {
+            p->setColor(wmath::Vec3d(0.0, 1.0, 0.5));
+        }
+        else {
+            p->setColor(wmath::Vec3d(0.0, 0.5, 1.0));
+        }
+        particles.push_back(p);
     }
 }
