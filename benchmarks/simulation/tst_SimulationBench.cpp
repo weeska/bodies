@@ -21,7 +21,7 @@ private Q_SLOTS:
 SimulationBench::SimulationBench()
 {
     UniformParticleGenerator generator(10000, 1);
-    generator.generate(m_space.particles());
+    generator.generate(m_space);
 }
 
 void SimulationBench::bench()

@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Particle.h"
+#include "Space.h"
 
 class ParticleGenerator {
 public:
-    virtual void generate(std::vector<ParticlePtr> &particles) const = 0;
+    virtual void generate(Space &data) const = 0;
 };

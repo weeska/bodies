@@ -4,48 +4,49 @@
 #include <future>
 static const double dt = 0.0001;
 
-void accumulateEffects(std::vector<ParticlePtr> &particles, int from, int to)
+inline double sqrLength(const wmath::Vec3d &from, const wmath::Vec3d &to) {
+    return (std::pow(to[0] - from[0], 2.0) +
+        std::pow(to[1] - from[1], 2.0) +
+        std::pow(to[2] - from[2], 2.0));
+}
+
+void accumulateEffects(Space::Data &data, size_t from, size_t to)
 {
-    for(int i=from; i < to; ++i) {
-        ParticlePtr p_i = particles[i];
-        wmath::Vec3d &acceleration = p_i->acceleration();
-        p_i->velocity() *= 0.9;
-        acceleration.fill(0.0);
+    for(size_t i = from; i < to; ++i) {
+        const wmath::Vec3d &constPosition = data.positions[i];
+        wmath::Vec3d &acceleration = data.accelerations[i];
+        data.velocities[i] *= 0.9;
 
-        for(ParticlePtr p_j: particles) {
-            const wmath::Vec3d &constPosition = p_i->constPosition();
-            const wmath::Vec3d &constTargetPosition = p_j->constPosition();
-            wmath::Vec3d difference;
+        for(size_t j = 0; j < data.positions.size(); ++j) {
+            const wmath::Vec3d &constTargetPosition = data.positions[j];
 
-            difference[0] = constTargetPosition[0] - constPosition[0];
-            difference[1] = constTargetPosition[1] - constPosition[1];
-            difference[2] = constTargetPosition[2] - constPosition[2];
-
-            if(difference.sqr_length() < 25.0) {
+            const double sqrDifference = sqrLength(constPosition, constTargetPosition);
+            if(sqrDifference < 25.0) {
                 continue;
             }
 
-            const double invr = 1.0/difference.length();
+            const double invr = 1.0/std::sqrt(sqrDifference);
             const double invr3 = invr * invr * invr;
-            const double f = p_j->mass() * invr3;
+            const double f = data.masses[i] * invr3;
 
-            acceleration[0] += f * difference[0];
-            acceleration[1] += f * difference[1];
-            acceleration[2] += f * difference[2];
+            acceleration[0] += f * (constTargetPosition[0] - constPosition[0]);
+            acceleration[1] += f * (constTargetPosition[1] - constPosition[1]);
+            acceleration[2] += f * (constTargetPosition[2] - constPosition[2]);
         }
     }
 }
 
 void Space::applyEffects()
 {
-    for(ParticlePtr particle : m_particles) {
-        wmath::Vec3d &position = particle->position();
-        wmath::Vec3d &velocity = particle->velocity();
-        wmath::Vec3d &acceleration = particle->acceleration();
+    for(size_t i = 0; i < this->particleCount(); ++i) {
+        wmath::Vec3d &position = m_data.positions[i];
+        wmath::Vec3d &velocity = m_data.velocities[i];
+        wmath::Vec3d &acceleration = m_data.accelerations[i];
 
         for(int i=0; i < 3; ++i) {
             position[i] += dt * velocity[i] + 0.5 * dt * dt * acceleration[i];
             velocity[i] += dt * acceleration[i];
+            acceleration[i] = 0.0;
         }
     }
 }
@@ -56,11 +57,11 @@ void Space::tick()
 
     std::vector<std::thread> threads;
 
-    const int elements_per_thread = std::ceil(m_particles.size()/num_threads);
+    const int elements_per_thread = std::ceil(this->particleCount()/num_threads);
     for(int i = 0; i < num_threads; ++i) {
         const int start = i * elements_per_thread;
-        const int end = (start + elements_per_thread) % (m_particles.size() + 1);
-        threads.push_back(std::thread(accumulateEffects, std::ref(m_particles), start, end));
+        const int end = (start + elements_per_thread) % (this->particleCount() + 1);
+        threads.push_back(std::thread(accumulateEffects, std::ref(m_data), start, end));
     }
 
     std::for_each(std::begin(threads), std::end(threads), [](std::thread &t) {t.join();});
@@ -68,13 +69,51 @@ void Space::tick()
     this->applyEffects();
 }
 
-std::vector<ParticlePtr> &Space::particles()
+size_t Space::particleCount() const
 {
-    return m_particles;
+    return m_data.positions.size();
 }
 
-const std::vector<ParticlePtr> &Space::constParticles() const
+const std::vector<wmath::Vec3d> &Space::accelerations() const
 {
-    return m_particles;
+    return m_data.accelerations;
+}
+
+const std::vector<wmath::Vec3d> &Space::colors() const
+{
+    return m_data.colors;
+}
+
+const std::vector<wmath::Vec3d> &Space::positions() const
+{
+    return m_data.positions;
+}
+
+const std::vector<wmath::Vec3d> &Space::velocities() const
+{
+    return m_data.velocities;
+}
+
+void Space::addParticleData(const wmath::Vec3d &position, const wmath::Vec3d &color, double mass) {
+    m_data.masses.push_back(mass);
+    m_data.positions.push_back(position);
+    m_data.colors.push_back(color);
+
+    m_data.accelerations.push_back(wmath::Vec3d());
+    m_data.velocities.push_back(wmath::Vec3d());
+}
+
+void Space::resetData()
+{
+    m_data = Space::Data();
+}
+
+void Space::reserve(size_t count)
+{
+    m_data.masses.reserve(count);
+    m_data.accelerations.reserve(count);
+    m_data.colors.reserve(count);
+    m_data.positions.reserve(count);
+    m_data.velocities.reserve(count);
 }
 
