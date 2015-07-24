@@ -18,7 +18,8 @@ Type addOp(const Type &lhs, const Type &rhs) {
 template <typename Type>
 Type subtractOp(const Type &lhs, const Type &rhs) {
     Type sum(lhs);
-    return std::move(sum -= rhs);
+    sum -= rhs;
+    return std::move(sum);
 }
 
 template <typename Type, typename Func>
@@ -38,11 +39,11 @@ public:
     {
     }
 
-    Vector operator+(const Vector &rhs) {
+    Vector operator+(const Vector &rhs) const {
         return std::move(operators::addOp(*this, rhs));
     }
 
-    Vector operator-(const Vector &rhs) {
+    Vector operator-(const Vector &rhs) const {
         return std::move(operators::subtractOp(*this, rhs));
     }
 
@@ -89,11 +90,11 @@ public:
         (*this)[1] = y;
     }
 
-    Vec2 operator+(const Vec2 &rhs) {
+    Vec2 operator+(const Vec2 &rhs) const {
         return std::move(operators::addOp(*this, rhs));
     }
 
-    Vec2 operator-(const Vec2 &rhs) {
+    Vec2 operator-(const Vec2 &rhs) const {
         return std::move(operators::subtractOp(*this, rhs));
     }
 };
@@ -109,11 +110,11 @@ public:
         (*this)[2] = z;
     }
 
-    Vec3 operator+(const Vec3 &rhs) {
+    Vec3 operator+(const Vec3 &rhs) const {
         return std::move(operators::addOp(*this, rhs));
     }
 
-    Vec3 operator-(const Vec3 &rhs) {
+    Vec3 operator-(const Vec3 &rhs) const {
         return std::move(operators::subtractOp(*this, rhs));
     }
 };
@@ -130,11 +131,11 @@ public:
         (*this)[3] = w;
     }
 
-    Vec4 operator+(const Vec4 &rhs) {
+    Vec4 operator+(const Vec4 &rhs) const {
         return std::move(operators::addOp(*this, rhs));
     }
 
-    Vec4 operator-(const Vec4 &rhs) {
+    Vec4 operator-(const Vec4 &rhs) const {
         return std::move(operators::subtractOp(*this, rhs));
     }
 };

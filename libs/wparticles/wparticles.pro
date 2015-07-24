@@ -5,13 +5,15 @@ CONFIG -= app_bundle qt
 SOURCES += \
     Particle.cpp \
     Space.cpp \
-    UniformParticleGenerator.cpp
+    UniformParticleGenerator.cpp \
+    Octree.cpp
 
 HEADERS += \
     Particle.h \
     Space.h \
     ParticleGenerator.h \
-    UniformParticleGenerator.h
+    UniformParticleGenerator.h \
+    Octree.h
 
 
 INCLUDEPATH += ../

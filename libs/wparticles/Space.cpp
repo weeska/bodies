@@ -4,34 +4,35 @@
 #include <future>
 static const double dt = 0.0001;
 
+inline double sqrLength(const wmath::Vec3d &from, const wmath::Vec3d &to) {
+    return (std::pow(to[0] - from[0], 2.0) +
+        std::pow(to[1] - from[1], 2.0) +
+        std::pow(to[2] - from[2], 2.0));
+}
+
 void accumulateEffects(std::vector<ParticlePtr> &particles, int from, int to)
 {
     for(int i=from; i < to; ++i) {
-        ParticlePtr p_i = particles[i];
+        ParticlePtr &p_i = particles[i];
+        const wmath::Vec3d &constPosition = p_i->constPosition();
         wmath::Vec3d &acceleration = p_i->acceleration();
         p_i->velocity() *= 0.9;
-        acceleration.fill(0.0);
 
         for(ParticlePtr p_j: particles) {
-            const wmath::Vec3d &constPosition = p_i->constPosition();
             const wmath::Vec3d &constTargetPosition = p_j->constPosition();
-            wmath::Vec3d difference;
+            const double sqrDifference = sqrLength(constPosition, constTargetPosition);
 
-            difference[0] = constTargetPosition[0] - constPosition[0];
-            difference[1] = constTargetPosition[1] - constPosition[1];
-            difference[2] = constTargetPosition[2] - constPosition[2];
-
-            if(difference.sqr_length() < 25.0) {
+            if(sqrDifference < 25.0) {
                 continue;
             }
 
-            const double invr = 1.0/difference.length();
+            const double invr = 1.0/std::sqrt(sqrDifference);
             const double invr3 = invr * invr * invr;
             const double f = p_j->mass() * invr3;
 
-            acceleration[0] += f * difference[0];
-            acceleration[1] += f * difference[1];
-            acceleration[2] += f * difference[2];
+            acceleration[0] += f * (constTargetPosition[0] - constPosition[0]);
+            acceleration[1] += f * (constTargetPosition[1] - constPosition[1]);
+            acceleration[2] += f * (constTargetPosition[2] - constPosition[2]);
         }
     }
 }
@@ -47,6 +48,7 @@ void Space::applyEffects()
             position[i] += dt * velocity[i] + 0.5 * dt * dt * acceleration[i];
             velocity[i] += dt * acceleration[i];
         }
+        acceleration *= 0.0;
     }
 }
 

@@ -15,7 +15,7 @@ public:
     SimulationBench();
 
 private Q_SLOTS:
-    void bench();
+    void naiveBench();
 };
 
 SimulationBench::SimulationBench()
@@ -24,7 +24,7 @@ SimulationBench::SimulationBench()
     generator.generate(m_space.particles());
 }
 
-void SimulationBench::bench()
+void SimulationBench::naiveBench()
 {
     QBENCHMARK {
         m_space.tick();

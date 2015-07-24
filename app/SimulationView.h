@@ -4,6 +4,7 @@
 #include <QTimer>
 #include "wparticles/Space.h"
 #include "wparticles/UniformParticleGenerator.h"
+#include "wparticles/Octree.h"
 
 class SimulationView : public QOpenGLWidget
 {
@@ -16,7 +17,6 @@ class SimulationView : public QOpenGLWidget
 public:
     SimulationView(QWidget *parent);
 
-    void drawMotionVectors();
     bool showVelocities() const;
 
 public slots:
@@ -28,4 +28,9 @@ protected:
     void initializeGL();
     void resizeGL(int w, int h);
     void paintGL();
+
+private:
+    void drawMotionVectors();
+    void drawOctree(const Octree &tree);
+    void drawOctreeCell(const wmath::Vec3d &center, const double halfEdgeLength) const;
 };

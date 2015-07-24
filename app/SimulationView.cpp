@@ -1,5 +1,6 @@
 #include "SimulationView.h"
 
+#include <QQueue>
 #include <cassert>
 #include <cmath>
 #include <random>
@@ -47,8 +48,9 @@ void SimulationView::setShowVelocities(bool show)
 
 void SimulationView::initializeGL()
 {
-    static const double scale = 1000.0;
-    glOrtho(-scale, scale, -scale, scale, -1.0, 1.0);
+    static const double scale = 1100.0;
+    const double ratio = static_cast<double>(this->width())/this->height();
+    glOrtho(-scale*ratio, scale*ratio, -scale, scale, -scale, scale);
 
     glEnable(GL_BLEND);
     glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -57,6 +59,11 @@ void SimulationView::initializeGL()
 void SimulationView::resizeGL(int w, int h)
 {
     glViewport(0, 0, w, h);
+
+    static const double scale = 1100.0;
+    const double ratio = static_cast<double>(w)/h;
+    glLoadIdentity();
+    glOrtho(-scale*ratio, scale*ratio, -scale, scale, -scale, scale);
 }
 
 void SimulationView::drawMotionVectors()
@@ -79,13 +86,80 @@ void SimulationView::drawMotionVectors()
     glEnd();
 }
 
+void SimulationView::drawOctreeCell(const wmath::Vec3d &center, const double halfEdgeLength) const
+{
+    glPushMatrix();
+        glTranslated(center[0], center[1], center[2]);
+        glScaled(halfEdgeLength, halfEdgeLength, halfEdgeLength);
+
+        glBegin(GL_LINES);
+
+            //TOP
+            glVertex3d(1.0, 1.0, 1.0);
+            glVertex3d(1.0, 1.0, -1.0);
+
+            glVertex3d(1.0, 1.0, -1.0);
+            glVertex3d(-1.0, 1.0, -1.0);
+
+            glVertex3d(-1.0, 1.0, -1.0);
+            glVertex3d(-1.0, 1.0, 1.0);
+
+            //Front
+            glVertex3d(1.0, 1.0, 1.0);
+            glVertex3d(1.0, -1.0, 1.0);
+
+            glVertex3d(1.0, -1.0, 1.0);
+            glVertex3d(-1.0, -1.0, 1.0);
+
+            glVertex3d(-1.0, -1.0, 1.0);
+            glVertex3d(-1.0, 1.0, 1.0);
+
+        glEnd();
+    glPopMatrix();
+}
+
+void SimulationView::drawOctree(const Octree &tree)
+{
+    QQueue<const Octree*> trees;
+    trees << &tree;
+
+    while(!trees.empty()) {
+        const Octree *tree = trees.front();
+        if(!tree) {
+            break;
+        }
+
+        const wmath::Vec3d &center = tree->center();
+        const double halfEdgeLength = tree->halfEdgeLength();
+
+        this->drawOctreeCell(center, halfEdgeLength);
+
+        if(!tree->isLeaf()) {
+            for(auto t : tree->children()) {
+                trees << t;
+            }
+        }
+        trees.pop_front();
+    }
+}
+
 void SimulationView::paintGL()
 {
-    glClear(GL_COLOR_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     if(m_showVelocities) {
         this->drawMotionVectors();
     }
+
+    glColor4d(1.0, 1.0, 1.0, 0.1);
+    glEnable(GL_DEPTH_TEST);
+
+    Octree tree(wmath::Vec3d(0.0, 0.0, 0.0), 1000.0);
+    for(ParticlePtr particle : m_space.constParticles()) {
+        tree.insert(particle);
+    }
+    this->drawOctree(tree);
+    glDisable(GL_DEPTH_TEST);
 
     glBegin(GL_POINTS);
     for(ParticlePtr particle : m_space.constParticles()) {

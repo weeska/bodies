@@ -16,6 +16,7 @@ private Q_SLOTS:
     void lengthTest();
     void normalizeTest();
     void testContructors();
+    void testMinusOp();
 };
 
 VectorTest::VectorTest() {
@@ -33,6 +34,18 @@ void VectorTest::testContructors()
     QCOMPARE(vec2[0], 0.0);
     QCOMPARE(vec2[1], 0.0);
     QCOMPARE(vec2[2], 0.0);
+}
+
+void VectorTest::testMinusOp()
+{
+    wmath::Vec3d v1(1.0, 2.0, 3.0);
+    wmath::Vec3d v2(1.0, 2.0, 3.0);
+
+    QCOMPARE(v1 - v2, wmath::Vec3d());
+
+    v1 -= v2;
+
+    QCOMPARE(v1, wmath::Vec3d());
 }
 
 void VectorTest::lengthTest()
