@@ -25,10 +25,11 @@ void UniformParticleGenerator::generate(std::vector<ParticlePtr> &particles) con
     for(size_t i = 0; i < m_particleCount; ++i) {
         double x = dist(gen);
         double y = dist(gen);
-        double z = 0.0;
+        double z = dist(gen);
 
         x = x * 2000.0 - 1000.0;
         y = y * 2000.0 - 1000.0;
+        z = z * 200.0 - 100.0;
 
         ParticlePtr p = std::make_shared<Particle>(10e8, x, y, z);
         if(x < 0.0) {

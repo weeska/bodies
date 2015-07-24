@@ -191,21 +191,28 @@ void SimulationView::paintGL()
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    if(m_showVelocities) {
-        this->drawMotionVectors();
-    }
+    glPushMatrix();
+        glRotated(45, 1.0, 0.0, 0.0);
+        glRotated(45, 0.0, 1.0, 0.0);
 
-    if(m_showOctree) {
-        this->drawOctree();
-    }
+        if(m_showVelocities) {
+            this->drawMotionVectors();
+        }
 
-    glBegin(GL_POINTS);
-    for(ParticlePtr particle : m_space.constParticles()) {
-        const wmath::Vec3d &color = particle->constColor();
-        const wmath::Vec3d &position = particle->constPosition();
-        glColor4d(color[0], color[1], color[2], 0.6);
-        glVertex3dv(position.data());
-    }
+        if(m_showOctree) {
+            this->drawOctree();
+        }
+
+        glBegin(GL_POINTS);
+        for(ParticlePtr particle : m_space.constParticles()) {
+            const wmath::Vec3d &color = particle->constColor();
+            const wmath::Vec3d &position = particle->constPosition();
+            glColor4d(color[0], color[1], color[2], 0.6);
+            glVertex3dv(position.data());
+        }
+
     glEnd();
+
+    glPopMatrix();
 }
 
