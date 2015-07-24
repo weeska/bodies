@@ -15,11 +15,24 @@ Octree::Octree(const wmath::Vec3d &center, double halfEdgeLength)
 {
 }
 
+
 Octree::~Octree()
+{
+    this->reset();
+}
+
+void Octree::reset()
 {
     for(int i=0; i < 8; ++i) {
         delete m_children[i];
+        m_children[i] = nullptr;
     }
+    m_particle.reset();
+}
+
+void Octree::computeMeans()
+{
+    //TODO: implement
 }
 
 const std::array<Octree *, 8> &Octree::children() const

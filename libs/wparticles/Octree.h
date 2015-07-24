@@ -27,4 +27,6 @@ public:
     int octantIndex(const wmath::Vec3d &position) const;
 
     void particlesInside(const wmath::Vec3d &min, const wmath::Vec3d &max, std::vector<ParticlePtr> &particles) const;
+    void reset();
+    void computeMeans();
 };

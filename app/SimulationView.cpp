@@ -20,8 +20,31 @@ void SimulationView::reset()
     }
 }
 
+
+bool SimulationView::showOctree() const
+{
+    return m_showOctree;
+}
+
+void SimulationView::setShowOctree(bool showOctree)
+{
+    m_showOctree = showOctree;
+}
+
+bool SimulationView::useOctree() const
+{
+    return m_useOctree;
+}
+
+void SimulationView::setUseOctree(bool useOctree)
+{
+    m_useOctree = useOctree;
+}
 SimulationView::SimulationView(QWidget *parent)
     : QOpenGLWidget(parent)
+    , m_tree(wmath::Vec3d(0.0, 0.0, 0.0), 1000.0)
+    , m_showOctree(false)
+    , m_useOctree(false)
     , m_showVelocities(false)
     , m_particleGenerator(std::make_shared<UniformParticleGenerator>(4000))
 {
@@ -33,7 +56,11 @@ SimulationView::SimulationView(QWidget *parent)
 
 void SimulationView::tick()
 {
+    if(m_showOctree || m_useOctree) {
+        this->buildOctree();
+    }
     m_space.tick();
+
     this->update();
     m_timer.start(1);
 }
@@ -116,12 +143,29 @@ void SimulationView::drawOctreeCell(const wmath::Vec3d &center, const double hal
 
         glEnd();
     glPopMatrix();
+
+    glDisable(GL_DEPTH_TEST);
 }
 
-void SimulationView::drawOctree(const Octree &tree)
+void SimulationView::buildOctree()
 {
+    m_tree.reset();
+    for(ParticlePtr particle : m_space.constParticles()) {
+        m_tree.insert(particle);
+    }
+
+    if(m_useOctree) {
+        m_tree.computeMeans();
+    }
+}
+
+void SimulationView::drawOctree()
+{
+    glColor4d(1.0, 1.0, 1.0, 0.1);
+    glEnable(GL_DEPTH_TEST);
+
     QQueue<const Octree*> trees;
-    trees << &tree;
+    trees << &m_tree;
 
     while(!trees.empty()) {
         const Octree *tree = trees.front();
@@ -151,15 +195,9 @@ void SimulationView::paintGL()
         this->drawMotionVectors();
     }
 
-    glColor4d(1.0, 1.0, 1.0, 0.1);
-    glEnable(GL_DEPTH_TEST);
-
-    Octree tree(wmath::Vec3d(0.0, 0.0, 0.0), 1000.0);
-    for(ParticlePtr particle : m_space.constParticles()) {
-        tree.insert(particle);
+    if(m_showOctree) {
+        this->drawOctree();
     }
-    this->drawOctree(tree);
-    glDisable(GL_DEPTH_TEST);
 
     glBegin(GL_POINTS);
     for(ParticlePtr particle : m_space.constParticles()) {

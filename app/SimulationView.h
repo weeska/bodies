@@ -11,18 +11,25 @@ class SimulationView : public QOpenGLWidget
     Q_OBJECT
 
     Space m_space;
+    Octree m_tree;
     QTimer m_timer;
+    bool m_showOctree;
+    bool m_useOctree;
     bool m_showVelocities;
     std::shared_ptr<ParticleGenerator> m_particleGenerator;
 public:
     SimulationView(QWidget *parent);
 
+    bool showOctree() const;
     bool showVelocities() const;
+    bool useOctree() const;
 
 public slots:
     void reset();
     void tick();
+    void setShowOctree(bool showOctree);
     void setShowVelocities(bool show);
+    void setUseOctree(bool useOctree);
 
 protected:
     void initializeGL();
@@ -30,7 +37,8 @@ protected:
     void paintGL();
 
 private:
+    void buildOctree();
     void drawMotionVectors();
-    void drawOctree(const Octree &tree);
+    void drawOctree();
     void drawOctreeCell(const wmath::Vec3d &center, const double halfEdgeLength) const;
 };

@@ -35,6 +35,23 @@
       </widget>
      </item>
      <item>
+      <widget class="QCheckBox" name="showOctreeCheckbox">
+       <property name="text">
+        <string>Show Octree</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="useOctreeCheckbox">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="text">
+        <string>User Octree</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <spacer name="verticalSpacer">
        <property name="orientation">
         <enum>Qt::Vertical</enum>
