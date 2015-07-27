@@ -9,6 +9,9 @@ class Octree
     const wmath::Vec3d m_center;
     const wmath::Vec3d m_halfEdge;
 
+    wmath::Vec3d m_meanPosition;
+    double m_meanMass;
+
     ParticlePtr m_particle;
     std::array<Octree *, 8> m_children;
 public:
@@ -28,5 +31,10 @@ public:
 
     void particlesInside(const wmath::Vec3d &min, const wmath::Vec3d &max, std::vector<ParticlePtr> &particles) const;
     void reset();
+
     void computeMeans();
+    double meanCellMass() const;
+    const wmath::Vec3d &meanCellPosition() const;
+private:
+    int numChildsWithData() const;
 };

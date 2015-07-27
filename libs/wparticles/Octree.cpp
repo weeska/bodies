@@ -11,6 +11,7 @@ const wmath::Vec3d &Octree::center() const
 Octree::Octree(const wmath::Vec3d &center, double halfEdgeLength)
     : m_center(center)
     , m_halfEdge(halfEdgeLength, halfEdgeLength, halfEdgeLength)
+    , m_meanMass()
     , m_children()
 {
 }
@@ -30,9 +31,52 @@ void Octree::reset()
     m_particle.reset();
 }
 
+int Octree::numChildsWithData() const {
+    int count = 0;
+    for( Octree *child : m_children) {
+        if(child && child->hasData()) {
+            ++count;
+        }
+    }
+
+    return count;
+}
+
 void Octree::computeMeans()
 {
-    //TODO: implement
+    m_meanMass = 0.0;
+    m_meanPosition = wmath::Vec3d();
+
+    if(this->isLeaf()) {
+        if(this->hasData()) {
+            m_meanMass = m_particle->mass();
+            m_meanPosition = m_particle->position();
+        }
+    }
+    else {
+        for( Octree *child : m_children) {
+            if(!child) {
+                break;
+            }
+
+            child->computeMeans();
+            m_meanMass += child->meanCellMass();
+            m_meanPosition += child->meanCellPosition();
+        }
+
+        m_meanMass /= std::max<float>(this->numChildsWithData(), 1.0f);
+        m_meanPosition /= std::max<float>(this->numChildsWithData(), 1.0f);
+    }
+}
+
+double Octree::meanCellMass() const
+{
+    return m_meanMass;// / std::max<float>(this->numChildsWithData(), 1.0f);
+}
+
+const wmath::Vec3d &Octree::meanCellPosition() const
+{
+    return m_meanPosition;
 }
 
 const std::array<Octree *, 8> &Octree::children() const
