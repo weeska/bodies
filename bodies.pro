@@ -8,3 +8,5 @@ SUBDIRS += \
 
 
 app.depends = libs
+benchmarks.depends = libs
+tests.depends = libs

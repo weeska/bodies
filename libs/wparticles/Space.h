@@ -12,6 +12,7 @@ public:
     std::vector<ParticlePtr> &particles();
     const std::vector<ParticlePtr> &constParticles() const;
 
+    void accumulateEffects(int from, int to);
 private:
     void applyEffects();
 private:

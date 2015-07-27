@@ -10,15 +10,15 @@ inline double sqrLength(const wmath::Vec3d &from, const wmath::Vec3d &to) {
         std::pow(to[2] - from[2], 2.0));
 }
 
-void accumulateEffects(std::vector<ParticlePtr> &particles, int from, int to)
+void Space::accumulateEffects(int from, int to)
 {
     for(int i=from; i < to; ++i) {
-        ParticlePtr &p_i = particles[i];
+        ParticlePtr &p_i = m_particles[i];
         const wmath::Vec3d &constPosition = p_i->constPosition();
         wmath::Vec3d &acceleration = p_i->acceleration();
         p_i->velocity() *= 0.9;
 
-        for(ParticlePtr p_j: particles) {
+        for(const ParticlePtr &p_j: m_particles) {
             const wmath::Vec3d &constTargetPosition = p_j->constPosition();
             const double sqrDifference = sqrLength(constPosition, constTargetPosition);
 
@@ -39,7 +39,7 @@ void accumulateEffects(std::vector<ParticlePtr> &particles, int from, int to)
 
 void Space::applyEffects()
 {
-    for(ParticlePtr particle : m_particles) {
+    for(ParticlePtr &particle : m_particles) {
         wmath::Vec3d &position = particle->position();
         wmath::Vec3d &velocity = particle->velocity();
         wmath::Vec3d &acceleration = particle->acceleration();
@@ -62,7 +62,7 @@ void Space::tick()
     for(int i = 0; i < num_threads; ++i) {
         const int start = i * elements_per_thread;
         const int end = (start + elements_per_thread) % (m_particles.size() + 1);
-        threads.push_back(std::thread(accumulateEffects, std::ref(m_particles), start, end));
+        threads.push_back(std::thread(&Space::accumulateEffects, this, start, end));
     }
 
     std::for_each(std::begin(threads), std::end(threads), [](std::thread &t) {t.join();});

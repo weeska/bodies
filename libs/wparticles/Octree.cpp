@@ -109,7 +109,9 @@ void Octree::insert(const ParticlePtr &newParticle)
             const int oldParticleIndex = this->octantIndex(oldParticle->position());
 
             m_children[oldParticleIndex]->insert(oldParticle);
-            m_children[newParticleIndex]->insert(newParticle);
+            if(oldParticle != newParticle) {
+                m_children[newParticleIndex]->insert(newParticle);
+            }
         }
     }
     else {
