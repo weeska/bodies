@@ -11,7 +11,7 @@ class SimulationView : public QOpenGLWidget
     Q_OBJECT
 
     Space m_space;
-    Octree m_tree;
+    std::shared_ptr<Octree> m_tree;
     QTimer m_timer;
     bool m_showOctree;
     bool m_useOctree;

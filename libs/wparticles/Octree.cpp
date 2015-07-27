@@ -3,12 +3,12 @@
 
 #include <iostream>
 
-const wmath::Vec3d &Octree::center() const
+const Octree::Position &Octree::center() const
 {
     return m_center;
 }
 
-Octree::Octree(const wmath::Vec3d &center, double halfEdgeLength)
+Octree::Octree(const Position &center, double halfEdgeLength)
     : m_center(center)
     , m_halfEdge(halfEdgeLength, halfEdgeLength, halfEdgeLength)
     , m_meanMass()
@@ -16,36 +16,18 @@ Octree::Octree(const wmath::Vec3d &center, double halfEdgeLength)
 {
 }
 
-
-Octree::~Octree()
-{
-    this->reset();
-}
-
 void Octree::reset()
 {
-    for(int i=0; i < 8; ++i) {
-        delete m_children[i];
-        m_children[i] = nullptr;
+    for( auto c : m_children ) {
+        c.reset();
     }
     m_particle.reset();
-}
-
-int Octree::numChildsWithData() const {
-    int count = 0;
-    for( Octree *child : m_children) {
-        if(child && child->hasData()) {
-            ++count;
-        }
-    }
-
-    return count;
 }
 
 void Octree::computeMeans()
 {
     m_meanMass = 0.0;
-    m_meanPosition = wmath::Vec3d();
+    m_meanPosition = Position();
 
     if(this->isLeaf()) {
         if(this->hasData()) {
@@ -54,32 +36,37 @@ void Octree::computeMeans()
         }
     }
     else {
-        for( Octree *child : m_children) {
+        int numChildsWithData = 0;
+        for( auto child : m_children) {
             if(!child) {
                 break;
             }
 
+            if(child->hasData()) {
+                ++numChildsWithData;
+            }
+
             child->computeMeans();
-            m_meanMass += child->meanCellMass();
-            m_meanPosition += child->meanCellPosition();
+            m_meanMass += child->meanMass();
+            m_meanPosition += child->meanPosition();
         }
 
-        m_meanMass /= std::max<float>(this->numChildsWithData(), 1.0f);
-        m_meanPosition /= std::max<float>(this->numChildsWithData(), 1.0f);
+        m_meanMass /= std::max<float>(numChildsWithData, 1.0f);
+        m_meanPosition /= std::max<float>(numChildsWithData, 1.0f);
     }
 }
 
-double Octree::meanCellMass() const
+double Octree::meanMass() const
 {
-    return m_meanMass;// / std::max<float>(this->numChildsWithData(), 1.0f);
+    return m_meanMass;
 }
 
-const wmath::Vec3d &Octree::meanCellPosition() const
+const Octree::Position &Octree::meanPosition() const
 {
     return m_meanPosition;
 }
 
-const std::array<Octree *, 8> &Octree::children() const
+const Octree::OctreeChildren &Octree::children() const
 {
     return m_children;
 }
@@ -101,7 +88,6 @@ double Octree::halfEdgeLength() const
 
 void Octree::insert(const ParticlePtr &newParticle)
 {
-
     if(this->isLeaf()) {
         if(!this->hasData()) {
             m_particle = newParticle;
@@ -111,12 +97,12 @@ void Octree::insert(const ParticlePtr &newParticle)
             m_particle.reset();
 
             for(int i = 0; i < 8; ++i) {
-                wmath::Vec3d subCenter(m_center);
+                Position subCenter(m_center);
                 subCenter[0] += m_halfEdge[0] * ( (i & 1) ? 0.5 : -0.5);
                 subCenter[1] += m_halfEdge[1] * ( (i & 2) ? 0.5 : -0.5);
                 subCenter[2] += m_halfEdge[2] * ( (i & 4) ? 0.5 : -0.5);
 
-                m_children[i] = new Octree(subCenter, m_halfEdge[0] * 0.5);
+                m_children[i].reset(new Octree(subCenter, m_halfEdge[0] * 0.5));
             }
 
             const int newParticleIndex = this->octantIndex(newParticle->position());
@@ -132,7 +118,7 @@ void Octree::insert(const ParticlePtr &newParticle)
     }
 }
 
-int Octree::octantIndex(const wmath::Vec3d &position) const
+int Octree::octantIndex(const Position &position) const
 {
     int idx = 0;
     if(position[0] >= m_center[0]) idx |= 1;
@@ -141,7 +127,7 @@ int Octree::octantIndex(const wmath::Vec3d &position) const
     return idx;
 }
 
-bool pointInCube(const wmath::Vec3d &min, const wmath::Vec3d &max, const wmath::Vec3d &point)
+bool pointInCube(const Octree::Position &min, const Octree::Position &max, const Octree::Position &point)
 {
     if(min[0] > point[0]) return false;
     if(min[1] > point[1]) return false;
@@ -154,7 +140,7 @@ bool pointInCube(const wmath::Vec3d &min, const wmath::Vec3d &max, const wmath::
     return true;
 }
 
-void Octree::particlesInside(const wmath::Vec3d &min, const wmath::Vec3d &max, std::vector<ParticlePtr> &particles) const
+void Octree::particlesInside(const Position &min, const Position &max, std::vector<ParticlePtr> &particles) const
 {
     if(this->isLeaf()) {
         if(this->hasData()) {
@@ -165,8 +151,8 @@ void Octree::particlesInside(const wmath::Vec3d &min, const wmath::Vec3d &max, s
     }
     else {
         for(int i=0; i<8; ++i) {
-            const wmath::Vec3d &childMax = m_children[i]->m_center + m_children[i]->m_halfEdge;
-            const wmath::Vec3d &childMin = m_children[i]->m_center - m_children[i]->m_halfEdge;
+            const Position &childMax = m_children[i]->m_center + m_children[i]->m_halfEdge;
+            const Position &childMin = m_children[i]->m_center - m_children[i]->m_halfEdge;
 
             if(childMax[0] < min[0] || childMax[1] < min[1] || childMax[2] < min[2]) continue;
             if(childMin[0] > max[0] || childMin[1] > max[1] || childMin[2] > max[2]) continue;

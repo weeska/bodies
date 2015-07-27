@@ -66,8 +66,8 @@ void OctreeTest::testSimpleComputeMeans()
     tree.insert(p);
     tree.computeMeans();
 
-    QCOMPARE(tree.meanCellMass(), 100.0);
-    QCOMPARE(tree.meanCellPosition(), p->position());
+    QCOMPARE(tree.meanMass(), 100.0);
+    QCOMPARE(tree.meanPosition(), p->position());
 }
 
 void OctreeTest::testComputeMeans()
@@ -81,8 +81,8 @@ void OctreeTest::testComputeMeans()
     tree.insert(particle2);
     tree.computeMeans();
 
-    QCOMPARE(tree.meanCellMass(), 150.0);
-    QCOMPARE(tree.meanCellPosition(), (particle1->position() + particle2->position()) * 0.5);
+    QCOMPARE(tree.meanMass(), 150.0);
+    QCOMPARE(tree.meanPosition(), (particle1->position() + particle2->position()) * 0.5);
 }
 
 void OctreeTest::testInsertSplit()

@@ -29,6 +29,7 @@ void OctreeBench::bench()
         for(auto p : particles) {
             tree.insert(p);
         }
+        tree.computeMeans();
     }
 }
 

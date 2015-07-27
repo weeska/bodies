@@ -42,7 +42,7 @@ void SimulationView::setUseOctree(bool useOctree)
 }
 SimulationView::SimulationView(QWidget *parent)
     : QOpenGLWidget(parent)
-    , m_tree(wmath::Vec3d(0.0, 0.0, 0.0), 1000.0)
+    , m_tree(std::make_shared<Octree>(wmath::Vec3d(0.0, 0.0, 0.0), 1000.0))
     , m_showOctree(false)
     , m_useOctree(false)
     , m_showVelocities(false)
@@ -149,13 +149,13 @@ void SimulationView::drawOctreeCell(const wmath::Vec3d &center, const double hal
 
 void SimulationView::buildOctree()
 {
-    m_tree.reset();
+    m_tree->reset();
     for(ParticlePtr particle : m_space.constParticles()) {
-        m_tree.insert(particle);
+        m_tree->insert(particle);
     }
 
     if(m_useOctree) {
-        m_tree.computeMeans();
+        m_tree->computeMeans();
     }
 }
 
@@ -164,11 +164,11 @@ void SimulationView::drawOctree()
     glColor4d(1.0, 1.0, 1.0, 0.1);
     glEnable(GL_DEPTH_TEST);
 
-    QQueue<const Octree*> trees;
-    trees << &m_tree;
+    QQueue<std::shared_ptr<Octree> > trees;
+    trees << m_tree;
 
     while(!trees.empty()) {
-        const Octree *tree = trees.front();
+        const std::shared_ptr<Octree> tree = trees.front();
         if(!tree) {
             break;
         }

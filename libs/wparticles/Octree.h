@@ -3,38 +3,37 @@
 #include <array>
 #include "wparticles/Particle.h"
 
-
 class Octree
 {
-    const wmath::Vec3d m_center;
-    const wmath::Vec3d m_halfEdge;
-
-    wmath::Vec3d m_meanPosition;
-    double m_meanMass;
-
-    ParticlePtr m_particle;
-    std::array<Octree *, 8> m_children;
 public:
-    Octree(const wmath::Vec3d &center, double halfEdgeLength);
-    ~Octree();
+    using OctreeChildren = std::array<std::shared_ptr<Octree>, 8>;
+    using Position = wmath::Vec3d;
 
-    const std::array<Octree *, 8> &children() const;
+    Octree(const Position &center, double halfEdgeLength);
+    const OctreeChildren &children() const;
 
     bool isLeaf() const;
     bool hasData() const;
 
-    const wmath::Vec3d &center() const;
+    const Position &center() const;
     double halfEdgeLength() const;
+    double meanMass() const;
+    const Position &meanPosition() const;
+    void particlesInside(const Position &min, const Position &max, std::vector<ParticlePtr> &particles) const;
+
+    int octantIndex(const Position &position) const;
 
     void insert(const ParticlePtr &newParticle);
-    int octantIndex(const wmath::Vec3d &position) const;
-
-    void particlesInside(const wmath::Vec3d &min, const wmath::Vec3d &max, std::vector<ParticlePtr> &particles) const;
     void reset();
-
     void computeMeans();
-    double meanCellMass() const;
-    const wmath::Vec3d &meanCellPosition() const;
+
 private:
-    int numChildsWithData() const;
+    const Position m_center;
+    const Position m_halfEdge;
+
+    Position m_meanPosition;
+    double m_meanMass;
+
+    ParticlePtr m_particle;
+    OctreeChildren m_children;
 };
