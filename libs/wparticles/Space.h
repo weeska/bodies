@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "Particle.h"
+#include "SpaceAccumulator.h"
 
 class Space
 {
@@ -12,9 +13,12 @@ public:
     std::vector<ParticlePtr> &particles();
     const std::vector<ParticlePtr> &constParticles() const;
 
-    void accumulateEffects(int from, int to);
+    void setAccumulator(SpaceAccumulator *accumulator);
+
 private:
     void applyEffects();
+
 private:
+    std::unique_ptr<SpaceAccumulator> m_accumulator;
     std::vector<ParticlePtr> m_particles;
 };

@@ -3,7 +3,9 @@
 
 #include <random>
 
+
 #include "wparticles/Space.h"
+#include "wparticles/NaiveAccumulator.h"
 #include "wparticles/UniformParticleGenerator.h"
 
 class SimulationBench : public QObject
@@ -26,6 +28,7 @@ SimulationBench::SimulationBench()
 
 void SimulationBench::naiveBench()
 {
+    m_space.setAccumulator(new NaiveAccumulator);
     QBENCHMARK {
         m_space.tick();
     }

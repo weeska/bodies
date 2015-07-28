@@ -4,39 +4,6 @@
 #include <future>
 static const double dt = 0.0001;
 
-inline double sqrLength(const wmath::Vec3d &from, const wmath::Vec3d &to) {
-    return (std::pow(to[0] - from[0], 2.0) +
-        std::pow(to[1] - from[1], 2.0) +
-        std::pow(to[2] - from[2], 2.0));
-}
-
-void Space::accumulateEffects(int from, int to)
-{
-    for(int i=from; i < to; ++i) {
-        ParticlePtr &p_i = m_particles[i];
-        const wmath::Vec3d &constPosition = p_i->constPosition();
-        wmath::Vec3d &acceleration = p_i->acceleration();
-        p_i->velocity() *= 0.9;
-
-        for(const ParticlePtr &p_j: m_particles) {
-            const wmath::Vec3d &constTargetPosition = p_j->constPosition();
-            const double sqrDifference = sqrLength(constPosition, constTargetPosition);
-
-            if(sqrDifference < 25.0) {
-                continue;
-            }
-
-            const double invr = 1.0/std::sqrt(sqrDifference);
-            const double invr3 = invr * invr * invr;
-            const double f = p_j->mass() * invr3;
-
-            acceleration[0] += f * (constTargetPosition[0] - constPosition[0]);
-            acceleration[1] += f * (constTargetPosition[1] - constPosition[1]);
-            acceleration[2] += f * (constTargetPosition[2] - constPosition[2]);
-        }
-    }
-}
-
 void Space::applyEffects()
 {
     for(ParticlePtr &particle : m_particles) {
@@ -51,22 +18,19 @@ void Space::applyEffects()
         acceleration *= 0.0;
     }
 }
+void Space::setAccumulator(SpaceAccumulator *accumulator)
+{
+    m_accumulator.reset(accumulator);
+}
+
 
 void Space::tick()
 {
-    static const int num_threads = std::thread::hardware_concurrency();
-
-    std::vector<std::thread> threads;
-
-    const int elements_per_thread = std::ceil(m_particles.size()/num_threads);
-    for(int i = 0; i < num_threads; ++i) {
-        const int start = i * elements_per_thread;
-        const int end = (start + elements_per_thread) % (m_particles.size() + 1);
-        threads.push_back(std::thread(&Space::accumulateEffects, this, start, end));
+    if(!m_accumulator) {
+        return;
     }
 
-    std::for_each(std::begin(threads), std::end(threads), [](std::thread &t) {t.join();});
-
+    m_accumulator->accumulate(m_particles);
     this->applyEffects();
 }
 

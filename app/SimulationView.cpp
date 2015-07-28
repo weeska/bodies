@@ -5,6 +5,8 @@
 #include <cmath>
 #include <random>
 
+#include "wparticles/NaiveAccumulator.h"
+
 static const double PI = 4 * std::atan(1);
 
 
@@ -49,6 +51,8 @@ SimulationView::SimulationView(QWidget *parent)
     , m_particleGenerator(std::make_shared<UniformParticleGenerator>(4000))
 {
     this->reset();
+
+    m_space.setAccumulator(new NaiveAccumulator);
 
     QObject::connect(&m_timer, SIGNAL(timeout()), SLOT(tick()));
     this->tick();
