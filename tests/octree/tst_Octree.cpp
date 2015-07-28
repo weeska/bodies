@@ -23,6 +23,7 @@ public:
     OctreeTest();
 private slots:
     void testNewIsEmpty();
+    void testResetIsEmpty();
     void testInsert();
     void testSimpleComputeMeans();
     void testComputeMeans();
@@ -35,6 +36,32 @@ OctreeTest::OctreeTest()
 }
 
 void OctreeTest::testNewIsEmpty()
+{
+    Octree tree(wmath::Vec3d(0.0, 0.0, 0.0), 1.0);
+    ParticlePtr particle1 = std::make_shared<Particle>(100.0, 0.5, 0.5, 0.5);
+    ParticlePtr particle2 = std::make_shared<Particle>(100.0, 0.75, 0.75, 0.75);
+
+    tree.insert(particle1);
+
+    QVERIFY(tree.hasData());
+    QVERIFY(tree.isLeaf());
+
+    tree.insert(particle2);
+
+    QVERIFY(!tree.isLeaf());
+    QVERIFY(!tree.hasData());
+
+    auto isNullPtr = [](const std::shared_ptr<Octree> t) { return t.get() == nullptr;};
+    QVERIFY(!std::any_of(std::begin(tree.children()), std::end(tree.children()), isNullPtr));
+
+    tree.reset();
+
+    QVERIFY(tree.isLeaf());
+    QVERIFY(!tree.hasData());
+    QVERIFY(std::all_of(std::begin(tree.children()), std::end(tree.children()), isNullPtr));
+}
+
+void OctreeTest::testResetIsEmpty()
 {
     Octree tree(wmath::Vec3d(0.0, 0.0, 0.0), 1.0);
 
@@ -81,7 +108,7 @@ void OctreeTest::testComputeMeans()
     tree.insert(particle2);
     tree.computeMeans();
 
-    QCOMPARE(tree.meanMass(), 150.0);
+    QCOMPARE(tree.meanMass(), 300.0);
     QCOMPARE(tree.meanPosition(), (particle1->position() + particle2->position()) * 0.5);
 }
 
