@@ -9,7 +9,7 @@ public:
     using OctreeChildren = std::array<std::shared_ptr<Octree>, 8>;
     using Vector = wmath::Vec3d;
 
-    Octree(const Vector &center, double halfEdgeLength);
+    Octree(const Vector &center, double halfEdgeLength, int depth = 0);
     const OctreeChildren &children() const;
 
     bool isLeaf() const;
@@ -27,15 +27,21 @@ public:
 
     void insert(const ParticlePtr &newParticle);
     void reset();
-    void computeMeans();
+    int computeMeans();
 
     const Vector &min() const;
     const Vector &max() const;
 
+    ParticlePtr mergeParticles(const ParticlePtr p1, const ParticlePtr p2);
+private:
+    int computeMeanFromChilds();
+    bool particlesTooClose(const ParticlePtr &p1, const ParticlePtr &p2);
     void updateMinMax(const ParticlePtr &particle);
+
 private:
     const Vector m_center;
     const Vector m_halfEdge;
+    const int m_depth;
 
     Vector m_min;
     Vector m_max;

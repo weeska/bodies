@@ -22,9 +22,10 @@ const Octree::Vector &Octree::center() const
     return m_center;
 }
 
-Octree::Octree(const Vector &center, double halfEdgeLength)
+Octree::Octree(const Vector &center, double halfEdgeLength, int depth)
     : m_center(center)
     , m_halfEdge(halfEdgeLength, halfEdgeLength, halfEdgeLength)
+    , m_depth(depth)
     , m_min(std::numeric_limits<double>::max(), std::numeric_limits<double>::max(), std::numeric_limits<double>::max())
     , m_max(std::numeric_limits<double>::min(), std::numeric_limits<double>::min(), std::numeric_limits<double>::min())
     , m_meanMass()
@@ -43,36 +44,45 @@ void Octree::reset()
     m_max = Vector(std::numeric_limits<double>::min(), std::numeric_limits<double>::min(), std::numeric_limits<double>::min());
 }
 
-void Octree::computeMeans()
+wmath::Vec3d meanOfMeans(const wmath::Vec3d &v1, const wmath::Vec3d &v2, double n1, double n2) {
+    if(n1 == 0) return v2 / n2;
+    if(n2 == 0) return v1 / n1;
+
+    return std::move(v1 * n1 / (n1+n2) + v2 * n2 / (n1+n2));
+}
+
+int Octree::computeMeanFromChilds()
 {
+    assert(!this->isLeaf());
+
     m_meanMass = 0.0;
     m_meanPosition = Vector();
+    int cellsUsed = 0;
 
+    for(const std::shared_ptr<Octree> &child : m_children) {
+        int childCellsUsed = child->computeMeans();
+        m_meanPosition = meanOfMeans(m_meanPosition, child->meanPosition(), cellsUsed, childCellsUsed);
+        m_meanMass += child->meanMass();
+
+        cellsUsed += childCellsUsed;
+    }
+
+    return cellsUsed;
+}
+
+int Octree::computeMeans()
+{
     if(this->isLeaf()) {
         if(this->hasData()) {
             m_meanMass = m_particle->mass();
             m_meanPosition = m_particle->position();
+            return 1;
         }
+        return 0;
     }
-    else {
-        int numChildsWithData = 0;
-        for( auto child : m_children) {
-            if(!child) {
-                break;
-            }
-
-            if(child->hasData()) {
-                ++numChildsWithData;
-            }
-
-            child->computeMeans();
-            m_meanMass += child->meanMass();
-            m_meanPosition += child->meanPosition();
-        }
-
-        m_meanPosition /= std::max<float>(numChildsWithData, 1.0f);
-    }
+    else return this->computeMeanFromChilds();
 }
+
 const Octree::Vector &Octree::min() const
 {
     return m_min;
@@ -131,6 +141,27 @@ void Octree::updateMinMax(const ParticlePtr &particle)
 
 }
 
+bool Octree::particlesTooClose(const ParticlePtr &p1, const ParticlePtr &p2) {
+    if(p1 == p2) return true;
+
+    const wmath::Vec3d &pos1 = p1->constPosition();
+    const wmath::Vec3d &pos2 = p2->constPosition();
+
+    if(std::abs(pos1[0] - pos2[0]) < std::abs(m_halfEdge[0]) * 0.1) return true;
+    if(std::abs(pos1[1] - pos2[1]) < std::abs(m_halfEdge[1]) * 0.1) return true;
+    if(std::abs(pos1[2] - pos2[2]) < std::abs(m_halfEdge[2]) * 0.1) return true;
+
+    return false;
+}
+
+ParticlePtr Octree::mergeParticles(const ParticlePtr p1, const ParticlePtr p2)
+{
+    if(p1 == p2) return p1;
+
+    const wmath::Vec3d &pos = (p1->constPosition() + p2->constPosition()) * 0.5;
+    return std::make_shared<Particle>(p1->mass() + p2->mass(), pos[0], pos[1], pos[2]);
+}
+
 void Octree::insert(const ParticlePtr &newParticle)
 {
     if(this->isLeaf()) {
@@ -149,14 +180,17 @@ void Octree::insert(const ParticlePtr &newParticle)
                 subCenter[1] += m_halfEdge[1] * ( (i & 2) ? 0.5 : -0.5);
                 subCenter[2] += m_halfEdge[2] * ( (i & 4) ? 0.5 : -0.5);
 
-                m_children[i].reset(new Octree(subCenter, m_halfEdge[0] * 0.5));
+                m_children[i].reset(new Octree(subCenter, m_halfEdge[0] * 0.5, m_depth + 1));
             }
 
             const int newParticleIndex = this->octantIndex(newParticle->position());
             const int oldParticleIndex = this->octantIndex(oldParticle->position());
 
-            m_children[oldParticleIndex]->insert(oldParticle);
-            if(oldParticle != newParticle) {
+            if(m_depth > 5 || this->particlesTooClose(newParticle, oldParticle)) {
+                m_children[newParticleIndex]->insert(this->mergeParticles(oldParticle, newParticle));
+            }
+            else {
+                m_children[oldParticleIndex]->insert(oldParticle);
                 m_children[newParticleIndex]->insert(newParticle);
             }
         }

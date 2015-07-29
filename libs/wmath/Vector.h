@@ -29,6 +29,13 @@ Type multOp(const Type &lhs, double factor) {
     return std::move(product);
 }
 
+template <typename Type>
+Type divOp(const Type &lhs, double factor) {
+    Type product(lhs);
+    product /= factor;
+    return std::move(product);
+}
+
 template <typename Type, typename Func>
 void binaryAssignOp(Type &lhs, const Type &rhs, Func f) {
     std::transform(std::begin(lhs), std::end(lhs),
@@ -133,6 +140,10 @@ public:
     Vec3 operator*(double factor) const {
         return std::move(operators::multOp(*this, factor));
     }
+
+    Vec3 operator/(double factor) const {
+        return std::move(operators::divOp(*this, factor));
+    }
 };
 
 template <typename Content>
@@ -154,6 +165,7 @@ public:
     Vec4 operator-(const Vec4 &rhs) const {
         return std::move(operators::subtractOp(*this, rhs));
     }
+
 };
 
 typedef Vec2<double> Vec2d;
