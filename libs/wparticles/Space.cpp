@@ -12,8 +12,8 @@ void Space::applyEffects()
         wmath::Vec3d &acceleration = particle->acceleration();
 
         for(int i=0; i < 3; ++i) {
-            position[i] += dt * velocity[i] + 0.5 * dt * dt * acceleration[i];
             velocity[i] += dt * acceleration[i];
+            position[i] += dt * velocity[i] + 0.5 * dt * dt * acceleration[i];
         }
         acceleration *= 0.0;
     }

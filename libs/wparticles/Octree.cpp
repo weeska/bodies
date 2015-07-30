@@ -45,8 +45,8 @@ void Octree::reset()
 }
 
 wmath::Vec3d meanOfMeans(const wmath::Vec3d &v1, const wmath::Vec3d &v2, double n1, double n2) {
-    if(n1 == 0) return v2 / n2;
-    if(n2 == 0) return v1 / n1;
+    if(n1 == 0) return v2;
+    if(n2 == 0) return v1;
 
     return std::move(v1 * n1 / (n1+n2) + v2 * n2 / (n1+n2));
 }

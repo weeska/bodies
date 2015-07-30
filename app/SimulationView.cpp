@@ -49,12 +49,12 @@ SimulationView::SimulationView(QWidget *parent)
     , m_showOctree(false)
     , m_useOctree(false)
     , m_showVelocities(false)
-    , m_particleGenerator(std::make_shared<UniformParticleGenerator>(4000))
+    , m_particleGenerator(std::make_shared<UniformParticleGenerator>(5000))
 {
     this->reset();
 
-    m_space.setAccumulator(new BarnesHutAccumulator(m_tree));
-    //m_space.setAccumulator(new NaiveAccumulator);
+    //m_space.setAccumulator(new BarnesHutAccumulator(m_tree));
+    m_space.setAccumulator(new NaiveAccumulator);
 
     QObject::connect(&m_timer, SIGNAL(timeout()), SLOT(tick()));
     this->tick();
@@ -112,7 +112,7 @@ void SimulationView::drawMotionVectors()
         glColor4d(1.0, 1.0, 0.0, 0.2);
         glVertex3d(p(0), p(1), p(2));
         glColor4d(1.0, 0.0, 0.0, 0.2);
-        glVertex3d(p(0) + v(0) * 0.001, p(1) + v(1) * 0.001, p(2) + v(2) * 0.001);
+        glVertex3d(p(0) + v(0) * 0.0001, p(1) + v(1) * 0.0001, p(2) + v(2) * 0.0001);
     }
     glEnd();
 }

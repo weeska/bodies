@@ -6,7 +6,7 @@ void NaiveAccumulator::doAccumulateEffects(std::vector<ParticlePtr> &particles, 
         ParticlePtr &targetParticle = particles[i];
         targetParticle->velocity() *= 0.9;
 
-        for(const ParticlePtr &influencingParticle: particles) {
+        for(const ParticlePtr &influencingParticle : particles) {
             this->accelerateParticle(influencingParticle->constPosition(), influencingParticle->mass(),
                                targetParticle->constPosition(), targetParticle->acceleration());
         }

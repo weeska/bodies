@@ -13,3 +13,8 @@ int main(int argc, char **argv)
     return app.exec();
 }
 
+//TODO: adjust octree to actual particle distribution
+//TODO: use better alternative to euler method
+//TODO: navigation
+//TODO: optional merging of particles
+//TODO: validate barnes hut and naive approach

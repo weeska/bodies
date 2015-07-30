@@ -12,14 +12,13 @@ inline double sqrLength(const wmath::Vec3d &from, const wmath::Vec3d &to) {
 
 void SpaceAccumulator::accelerateParticle(const wmath::Vec3d &influencePosition, double influenceMass, const wmath::Vec3d &targetPosition, wmath::Vec3d &targetAcceleration) {
 
-    const double sqrDifference = sqrLength(targetPosition, influencePosition);
-    if(sqrDifference < 25.0) {
-        return;
-    }
+    static const double G = 1.0;
+    static const double epsilon = 0.0001;
 
-    const double invr = 1.0/std::sqrt(sqrDifference);
+    const double sqrDifference = sqrLength(targetPosition, influencePosition);
+    const double invr = 1.0/std::sqrt(sqrDifference + epsilon);
     const double invr3 = invr * invr * invr;
-    const double f = influenceMass * invr3;
+    const double f = G * influenceMass * std::sqrt(sqrDifference + epsilon) * invr3;
 
     targetAcceleration[0] += f * (influencePosition[0] - targetPosition[0]);
     targetAcceleration[1] += f * (influencePosition[1] - targetPosition[1]);
